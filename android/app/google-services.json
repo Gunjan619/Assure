@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "233678772468",
+    "project_id": "assure-72c7a",
+    "storage_bucket": "assure-72c7a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233678772468:android:ec36dacf4a0c4c60ca26a1",
+        "android_client_info": {
+          "package_name": "com.example.assur"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2xYmq36UXg-Tz7CmeHOePN8gK9d8PApo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:233678772468:android:88367303f6434ce0ca26a1",
+        "android_client_info": {
+          "package_name": "com.example.assure"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2xYmq36UXg-Tz7CmeHOePN8gK9d8PApo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
