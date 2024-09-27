@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Splash Screen Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -54,8 +55,8 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE044B9),  // Start color (similar to the pinkish top)
-              Color(0xFFF7A15F),  // End color (similar to the peach bottom)
+              Color(0xFFF7A15F),  // Start color (similar to the pinkish top)
+              Color(0xFFE044B9),  // End color (similar to the peach bottom)
             ],
           ),
         ),
