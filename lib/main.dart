@@ -55,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFF7A15F),  // Start color (similar to the pinkish top)
+              Color(0xFFF7A15F),  // Start color (similar to the pinkish top) 
               Color(0xFFE044B9),  // End color (similar to the peach bottom)
             ],
           ),
@@ -75,13 +75,13 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 20),
 
               const SizedBox(height: 10),
-              const Text(
-                'Loading...',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
-                ),
-              ),
+              // const Text(
+              //   'Loading...',
+              //   style: TextStyle(
+              //     fontSize: 18,
+              //     color: Colors.grey,
+              //   ),
+              // ),
               const SizedBox(height: 20),
               const CircularProgressIndicator(
                 strokeWidth: 2,

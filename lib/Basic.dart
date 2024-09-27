@@ -53,7 +53,7 @@ class _BasicInformationPageState extends State<BasicInformationPage> {
                           backgroundColor: Colors.white,
                           child: ClipOval(
                             child: Image.asset(
-                              'Images/Avatar.jpg',
+                              'Images/Avatar.png',
                               fit: BoxFit.cover, // Ensures the avatar fits the circle
                               width: 160.0,
                               height: 160.0,
