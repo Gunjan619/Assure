@@ -1,130 +1,209 @@
 import 'package:flutter/material.dart';
-
-const kSpacing = 16.0;
-const kPrimaryColor = Color(0xFFE044B9);
-const kSecondaryColor = Color(0xFFF7A15F);
-const kTextColor = Colors.black; // Darker color for better contrast
-
-class BasicInformationPage extends StatefulWidget {
-  const BasicInformationPage({Key? key}) : super(key: key);
-
+class WelcomeScreen extends StatefulWidget {
   @override
-  State<BasicInformationPage> createState() => _BasicInformationPageState();
+  _WelcomeScreenState createState() => _WelcomeScreenState();
 }
 
-class _BasicInformationPageState extends State<BasicInformationPage> {
-  String? selectedValue;
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  String selectedRole = ''; // To store the selected role
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height,  // Ensure the container takes the full height
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [kPrimaryColor, kSecondaryColor],
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(kSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment(0.6, 0.6),
+            colors: [
+              Color(0xFFFDBA74), // Gradient color
+              Colors.white,      // White towards the bottom
+            ],
+            stops: [0.0, 0.7], // Extend gradient to touch the avatar
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 50),
+              // Logo with text
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const SizedBox(height: kSpacing),
-                  Center(
-                    child: Column(
-                      children: [
-                        // Adding the logo above the avatar
-                        Container(
-                          width: MediaQuery.of(context).size.width,  // Full width of the screen
-                          height: 150,  // Adjust the height as per your preference
-                          child: Image.asset(
-                            'Images/logo.png', // Replace with your image path
-                            fit: BoxFit.contain,  // Contain ensures the image fits within the given width and height while maintaining its aspect ratio
-                          ),
-                        ),
-                        const SizedBox(height: kSpacing),
-                        CircleAvatar(
-                          radius: 80.0,
-                          backgroundColor: Colors.white,
-                          child: ClipOval(
-                            child: Image.asset(
-                              'Images/Avatar.png',
-                              fit: BoxFit.cover, // Ensures the avatar fits the circle
-                              width: 160.0,
-                              height: 160.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  Image.asset(
+                    'Images/logo2.png', // Add your logo asset here
+                    height: 50,
                   ),
-                  const SizedBox(height: kSpacing),
+                  SizedBox(width: 10),
+                ],
+              ),
+              SizedBox(height: 40),
+              // Welcome text
+              Text(
+                'Welcome',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 10),
+              // Subtitle
+              Text(
+                "Let's start by learning a little about you.",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 30),
+              // Avatar upload section
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: Colors.orange.shade100,
+                child: ClipOval(
+                  child: Image.asset(
+                    'Images/Avatar.png', // Add your avatar image here
+                    width: 80,
+                    height: 80,
+                  ),
+                ),
+              ),
+              SizedBox(height: 10),
 
-                  const SizedBox(height: kSpacing * 2),
-                  Text(
-                    'What is your full name?',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                      color: kTextColor,
-                    ),
+              SizedBox(height: 30),
+              // Name input field
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "What's your name?",
+                  labelStyle: TextStyle(color: Colors.black54),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blueAccent),
                   ),
-                  const SizedBox(height: kSpacing),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      fillColor: Colors.white.withOpacity(0.42),
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      contentPadding: const EdgeInsets.all(16.0),
-                    ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blueAccent),
                   ),
-                  const SizedBox(height: kSpacing),
-                  Text(
-                    'Who are you?',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold,
-                      color: kTextColor,
-                    ),
-                  ),
-                  const SizedBox(height: kSpacing),
-                  DropdownButtonFormField<String>(
-                    value: selectedValue,
-                    onChanged: (newValue) {
+                ),
+              ),
+              SizedBox(height: 20),
+              // Role selection section
+              Text(
+                "What's your role?",
+                style: TextStyle(fontSize: 18, color: Colors.black54),
+              ),
+              SizedBox(height: 10),
+              // Role selection buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  RoleButton(
+                    icon: Icons.man,
+                    label: 'Father',
+                    isSelected: selectedRole == 'Father',
+                    onTap: () {
                       setState(() {
-                        selectedValue = newValue;
+                        selectedRole = 'Father';
                       });
                     },
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Father',
-                        child: Text('Father'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Mother',
-                        child: Text('Mother'),
-                      ),
-                    ],
-                    decoration: InputDecoration(
-                      fillColor: Colors.white.withOpacity(0.42),
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      contentPadding: const EdgeInsets.all(16.0),
-                    ),
+                    color: selectedRole == 'Father'
+                        ? Color(0xFFF38A3A) // Warm orange for selection
+                        : Color(0xFFFFE3C9), // Soft peach when not selected
+                  ),
+                  RoleButton(
+                    icon: Icons.woman,
+                    label: 'Mother',
+                    isSelected: selectedRole == 'Mother',
+                    onTap: () {
+                      setState(() {
+                        selectedRole = 'Mother';
+                      });
+                    },
+                    color: selectedRole == 'Mother'
+                        ? Color(0xFFF38A3A) // Warm orange for selection
+                        : Color(0xFFFFE3C9), // Soft peach when not selected
                   ),
                 ],
               ),
-            ),
+              Spacer(),
+              // Page indicator and next button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '1 of 4',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  ElevatedButton(
+                    onPressed: selectedRole.isNotEmpty ? () {
+                      // Add your navigation functionality here
+                    } : null, // Disable button if no role selected
+                    style: ElevatedButton.styleFrom(
+                      shape: CircleBorder(),
+                      padding: EdgeInsets.all(16),
+                      backgroundColor: selectedRole.isNotEmpty
+                          ? Colors.blue
+                          : Colors.grey, // Change color when disabled
+                    ),
+                    child: Icon(Icons.arrow_forward, color: Colors.white),
+                  ),
+                ],
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
+class RoleButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final Color color; // Add color parameter for custom color
+
+  RoleButton({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    required this.color, // Initialize the custom color
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: color, // Use the passed color
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.orangeAccent : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.white,
+              child: Icon(icon, size: 30, color: Colors.orangeAccent),
+            ),
+            SizedBox(height: 8),
+            // Change the text color based on selection
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                color: isSelected ? Colors.white : Colors.black54, // White when selected, black when not
+              ),
+            ),
+          ],
         ),
       ),
     );

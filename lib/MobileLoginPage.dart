@@ -20,7 +20,7 @@ class BabyCareWelcomeScreen extends StatelessWidget {
                       width: MediaQuery.of(context).size.width,  // Full width of the screen
                       height: 150,  // Adjust the height as per your preference
                       child: Image.asset(
-                        'Images/logo.png', // Replace with your image path
+                        'Images/logo2.png', // Replace with your image path
                         fit: BoxFit.contain,  // Contain ensures the image fits within the given width and height while maintaining its aspect ratio
                       ),
                     ),
