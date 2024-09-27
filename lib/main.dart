@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Splash Screen Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -50,13 +51,12 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          //testing new gradient
           gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [ 
-              const Color(0xFFDD5E89),  // Start color 
-              const Color(0xFFF7BB97),  // End color
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFFF7A15F),  // Start color (similar to the pinkish top)
+              Color(0xFFE044B9),  // End color (similar to the peach bottom)
             ],
           ),
         ),
@@ -75,13 +75,13 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 20),
 
               const SizedBox(height: 10),
-              // const Text(
-              //   'Loading...',
-              //   style: TextStyle(
-              //     fontSize: 18,
-              //     color: Colors.grey,
-              //   ),
-              // ),
+              const Text(
+                'Loading...',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey,
+                ),
+              ),
               const SizedBox(height: 20),
               const CircularProgressIndicator(
                 strokeWidth: 2,

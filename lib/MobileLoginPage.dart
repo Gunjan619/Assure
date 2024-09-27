@@ -1,4 +1,5 @@
 import 'package:assure/Home.dart';
+import 'package:assure/Services/otp.dart';
 import 'package:flutter/material.dart';
 
 class BabyCareWelcomeScreen extends StatelessWidget {
@@ -51,6 +52,27 @@ class BabyCareWelcomeScreen extends StatelessWidget {
               ),
 
               SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => CodeVerificationScreen()),
+                  );
+                  // Handle Google Sign In
+                },
+                // icon: Image.asset(
+                //   'assets/images/google_icon.png', // You can download and add a Google icon here
+                //   height: 24,
+                //   width: 24,
+                // ),
+                label: Text('Submit'),
+                style: ElevatedButton.styleFrom(
+                  iconColor: Colors.white, // Button background color
+                  // onPrimary: Colors.black, // Text color
+                  side: BorderSide(color: Colors.grey), // Border color
+                ),
+              ),
+
 
               // Sign In with Google button
               ElevatedButton.icon(
