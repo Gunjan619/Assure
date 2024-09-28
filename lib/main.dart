@@ -55,8 +55,8 @@ class _SplashScreenState extends State<SplashScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFe7d39c), // Start color
-              Color(0xFFf7f7f7), // End color // End color (similar to the peach bottom)
+              Color(0xFF2193b0), // Start color (Teal)
+              Color(0xFF6dd5ed), // End color (Light Blue)
             ],
           ),
         ),
@@ -68,13 +68,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 width: MediaQuery.of(context).size.width,  // Full width of the screen
                 height: 150,  // Adjust the height as per your preference
                 child: Image.asset(
-                  'Images/logo2.png', // Replace with your image path
+                  'Images/logo.png', // Replace with your image path
                   fit: BoxFit.contain,  // Contain ensures the image fits within the given width and height while maintaining its aspect ratio
                 ),
               ),
               const SizedBox(height: 20),
 
               const SizedBox(height: 10),
+              // Optional loading text
               // const Text(
               //   'Loading...',
               //   style: TextStyle(
@@ -84,7 +85,8 @@ class _SplashScreenState extends State<SplashScreen> {
               // ),
               const SizedBox(height: 20),
               const CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Set indicator color
               ),
             ],
           ),
@@ -92,5 +94,4 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
-
 }

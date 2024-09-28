@@ -1,4 +1,4 @@
-import 'package:assure/Basic.dart';
+import 'package:assure/Basic%20Info/Basic.dart';
 import 'package:flutter/material.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
