@@ -189,8 +189,8 @@ class GradientBoxPainter extends CustomPainter {
     // Define gradient colors
     final Gradient gradient = LinearGradient(
       colors: [
-        Color(0xFFE6B3FF), // Lighter lavender
-        Color(0xFFFFE0E0), // Light coral
+        Color(0xFFFFF4DE), // Light peach color (top-left)
+        Color(0xFFEEC6A6), // Light orange shade (bottom-right)
       ],
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
