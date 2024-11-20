@@ -1,3 +1,4 @@
+import 'package:assure/Basic%20Info/weight.dart';
 import 'package:flutter/material.dart';
 
 class BabyDietScreen extends StatelessWidget {
@@ -136,7 +137,12 @@ class BabyDietScreen extends StatelessWidget {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => GrowthHistoryScreen()),
+                          );
+                        },
                         child: Text("Continue"),
                         style: ElevatedButton.styleFrom(
                           iconColor: Colors.blue,

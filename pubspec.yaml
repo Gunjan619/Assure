@@ -35,6 +35,8 @@ dependencies:
   sign_in_button: ^3.2.0
   firebase_core: ^3.5.0
   fluttertoast: ^8.2.8
+  font_awesome_flutter: ^10.5.0
+  material_design_icons_flutter: ^5.0.5955
   intl: ^0.19.0
 
 
@@ -71,6 +73,8 @@ flutter:
     - Images/openImage.png
     - Images/Avatar.png
     - Images/Food.png
+    - Images/graph.png
+    - Images/graph2.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
