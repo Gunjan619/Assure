@@ -27,7 +27,7 @@ class SignInPage extends StatelessWidget {
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
-
+        
         // Sign in to Firebase with the Google credential
         UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
         return userCredential.user;
