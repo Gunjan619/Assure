@@ -1,10 +1,16 @@
 import 'package:assure/Home.dart';
 import 'package:assure/Services/otp.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 class BabyCareWelcomeScreen extends StatelessWidget {
+  final _phoneNumberController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -44,6 +50,7 @@ class BabyCareWelcomeScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40.0),
                 child: TextField(
+                  controller: _phoneNumberController,
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Mobile Number',
@@ -54,10 +61,7 @@ class BabyCareWelcomeScreen extends StatelessWidget {
               SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CodeVerificationScreen()),
-                  );
+                  mobilelogin(context, _phoneNumberController.text);
                   // Handle Google Sign In
                 },
                 // icon: Image.asset(
@@ -100,5 +104,41 @@ class BabyCareWelcomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+  Future<void> _makeApiRequest(String phoneNumber, BuildContext context) async {
+    try {
+
+      final url=dotenv.env["BACKEND_URL"];
+      final response = await http.post(
+        Uri.parse('$url/api/mobile-auth/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: '{"mobile": "$phoneNumber"}', // Replace with actual phone number
+      );
+      print(response.body);
+
+
+      if (response.statusCode == 200) {
+        // Request successful, handle the response data
+        print('API request successful: ${response.body}');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => CodeVerificationScreen()),
+        );
+      } else {
+        // Request failed, handle the error
+        // use response.body to read error message and show to user as required
+        print('API request failed with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle any errors that occurred during the request
+      print('Error during API request: $e');
+    }
+  }
+  void mobilelogin(BuildContext context, String phoneNumber) {
+    _makeApiRequest(phoneNumber, context); // You might want to pass the phoneNumber to this function
+
+    
   }
 }
