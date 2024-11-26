@@ -1,45 +1,43 @@
 {
   "project_info": {
-    "project_number": "233678772468",
-    "project_id": "assure-72c7a",
-    "storage_bucket": "assure-72c7a.appspot.com"
+    "project_number": "838132368044",
+    "project_id": "assure-593aa",
+    "storage_bucket": "assure-593aa.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:233678772468:android:ec36dacf4a0c4c60ca26a1",
+        "mobilesdk_app_id": "1:838132368044:android:d1e16447fc31bbea68d509",
         "android_client_info": {
-          "package_name": "com.example.assur"
+          "package_name": "com.example.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "838132368044-qf74dg4sbt41eun4s8u7aeruofkor74o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyB2xYmq36UXg-Tz7CmeHOePN8gK9d8PApo"
+          "current_key": "AIzaSyD6qeLyhMllOzZNbmtZQWZRv3mAi3CVkFM"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:233678772468:android:88367303f6434ce0ca26a1",
-        "android_client_info": {
-          "package_name": "com.example.assure"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyB2xYmq36UXg-Tz7CmeHOePN8gK9d8PApo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "838132368044-qf74dg4sbt41eun4s8u7aeruofkor74o.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "838132368044-0qvdgearnk6uh9i4bq541vo2luqp5kjl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.assure"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,6 +1,7 @@
 import 'package:assure/Basic%20Info/3rd.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BabyInfoPage extends StatefulWidget {
   const BabyInfoPage({Key? key}) : super(key: key);
@@ -16,6 +17,32 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
   final TextEditingController _dateController = TextEditingController();
 
   String? _selectedGender;
+  String? _parentName = "Parent"; // Default value before fetching the data
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchParentName(); // Fetch parent name from Firebase when the page loads
+  }
+
+  Future<void> _fetchParentName() async {
+    try {
+      // Example Firestore collection and document path
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users') // Adjust the collection name
+          .doc('USER_ID') // Replace with the actual user ID
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          _parentName = userDoc['name'] ?? "Parent"; // Fetch the 'name' field
+        });
+      }
+    } catch (e) {
+      // Handle errors (e.g., network issues, permission issues)
+      print("Error fetching parent name: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,9 +68,10 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
                       height: 80,
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      'Hello, Parent!',
-                      style: TextStyle(
+                    // Display fetched parent name
+                    Text(
+                      'Hello, $_parentName!',
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF333333),
@@ -199,7 +227,6 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide(color: Colors.grey.shade300),
-
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -242,8 +269,6 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
                 const Text('2 of 3'), // Step Indicator
                 ElevatedButton(
                   onPressed: () {
-
-
                     // Add your navigation or submission logic here
                     if (_babyNameController.text.isNotEmpty &&
                         _babyWeightController.text.isNotEmpty &&
@@ -258,9 +283,6 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
                         context,
                         MaterialPageRoute(builder: (context) => BabyDietScreen()),
                       );
-
-
-                      // Navigate to the next page or perform any action needed
                     } else {
                       // Handle error for invalid input
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -291,20 +313,20 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
+      initialDate: DateTime.now(),
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _dateController.text = DateFormat('dd/MM/yyyy').format(picked);  // Update the date in the text field
+        _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate!);
       });
     }
   }
 }
 
-// Gender Button Class
+// Gender Button Widget
 class GenderButton extends StatelessWidget {
   final String text;
   final bool isSelected;
@@ -314,28 +336,23 @@ class GenderButton extends StatelessWidget {
     required this.text,
     required this.isSelected,
     required this.onPressed,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFFBB86FC) : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: isSelected ? Colors.transparent : Colors.grey.shade300,
-          ),
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        iconColor: isSelected ? const Color(0xFFBB86FC) : Colors.grey.shade200,
+
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontSize: 16,
-          ),
-        ),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 14),
       ),
     );
   }

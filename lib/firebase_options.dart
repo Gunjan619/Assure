@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB2xYmq36UXg-Tz7CmeHOePN8gK9d8PApo',
-    appId: '1:233678772468:android:88367303f6434ce0ca26a1',
-    messagingSenderId: '233678772468',
-    projectId: 'assure-72c7a',
-    storageBucket: 'assure-72c7a.appspot.com',
+    apiKey: 'AIzaSyD6qeLyhMllOzZNbmtZQWZRv3mAi3CVkFM',
+    appId: '1:838132368044:android:d1e16447fc31bbea68d509',
+    messagingSenderId: '838132368044',
+    projectId: 'assure-593aa',
+    storageBucket: 'assure-593aa.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBXGiUfXe8vgBP81X0ZekOhoRziGz-XF_A',
-    appId: '1:233678772468:ios:e60de3b42aaaef32ca26a1',
-    messagingSenderId: '233678772468',
-    projectId: 'assure-72c7a',
-    storageBucket: 'assure-72c7a.appspot.com',
+    apiKey: 'AIzaSyCbCJaS4Y4W3tkYsc-epNEYZSh_KtcPLyA',
+    appId: '1:838132368044:ios:2d7ba1581d0d8ee368d509',
+    messagingSenderId: '838132368044',
+    projectId: 'assure-593aa',
+    storageBucket: 'assure-593aa.firebasestorage.app',
+    iosClientId: '838132368044-0qvdgearnk6uh9i4bq541vo2luqp5kjl.apps.googleusercontent.com',
     iosBundleId: 'com.example.assure',
   );
 

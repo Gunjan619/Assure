@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore package
+import 'package:firebase_core/firebase_core.dart';
 import 'package:assure/Basic%20Info/2nd.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: WelcomeScreen(),
+  ));
+}
 
 class WelcomeScreen extends StatefulWidget {
   @override
@@ -8,6 +19,22 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   String selectedRole = ''; // To store the selected role
+  TextEditingController nameController = TextEditingController(); // Controller for name input
+
+  // Function to store data in Firebase Firestore
+  Future<void> storeDataToFirestore() async {
+    try {
+      // Reference Firestore and add data
+      await FirebaseFirestore.instance.collection('users').add({
+        'name': nameController.text,
+        'role': selectedRole,
+        'timestamp': FieldValue.serverTimestamp(), // To store the creation time
+      });
+      print("Data successfully stored in Firestore!");
+    } catch (e) {
+      print("Error storing data: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,9 +45,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           // Custom painter with gradient sloping from right to left
           CustomPaint(
             size: Size(double.infinity, MediaQuery.of(context).size.height),
-            painter: GradientBoxPainter(), // Updated gradient colors
+            painter: GradientBoxPainter(),
           ),
-          SingleChildScrollView( // Wrap with SingleChildScrollView to allow scrolling when keyboard is visible
+          SingleChildScrollView(
+            // Allows scrolling when the keyboard is visible
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -34,7 +62,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     children: [
                       Image.asset(
                         'Images/logo2.png', // Add your logo asset here
-                        height: 60, // Adjusted to match reference design
+                        height: 60,
                       ),
                       SizedBox(width: 8), // Small gap between logo and text
                     ],
@@ -44,9 +72,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   Text(
                     'Welcome',
                     style: TextStyle(
-                      fontSize: 28, // Adjusted font size
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF333333), // Darker shade of gray
+                      color: Color(0xFF333333),
                     ),
                   ),
                   SizedBox(height: 10),
@@ -55,19 +83,19 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     "Let's start by learning a little about you.",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Color(0xFF5A5A5A), // Slightly darker gray for a subtle look
+                      color: Color(0xFF5A5A5A),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 30),
                   // Avatar upload section
                   CircleAvatar(
-                    radius: 60, // Increased size for the avatar
-                    backgroundColor: Color(0xFFBB86FC), // Brighter purple
+                    radius: 60,
+                    backgroundColor: Color(0xFFBB86FC),
                     child: ClipOval(
                       child: Image.asset(
                         'Images/Avatar.png', // Add your avatar image here
-                        width: 90, // Adjusted width
+                        width: 90,
                         height: 90,
                       ),
                     ),
@@ -76,19 +104,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   SizedBox(height: 30),
                   // Name input field
                   TextField(
-                    cursorColor: Colors.black, // Set the cursor color to black
+                    controller: nameController, // Connect controller to TextField
+                    cursorColor: Colors.black,
                     decoration: InputDecoration(
                       labelText: "What's your name?",
                       labelStyle: TextStyle(color: Colors.black54),
                       contentPadding: EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 12), // Increased padding
+                          vertical: 16, horizontal: 12),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16), // Rounded corners
-                        borderSide: BorderSide(color: Colors.grey.shade300), // Light border color
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Colors.purple.shade400), // Purple outline when focused
+                        borderSide:
+                        BorderSide(color: Colors.purple.shade400),
                       ),
                     ),
                   ),
@@ -113,11 +143,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           });
                         },
                         color: selectedRole == 'Father'
-                            ? Color(0xFFBB86FC) // Brighter purple for selection
-                            : Color(0xFFFFE0E0), // Light coral when not selected
+                            ? Color(0xFFBB86FC)
+                            : Color(0xFFFFE0E0),
                         borderColor: selectedRole == 'Father'
-                            ? Colors.white // White border when selected
-                            : Colors.transparent, // No border when not selected
+                            ? Colors.white
+                            : Colors.transparent,
                       ),
                       RoleButton(
                         icon: Icons.woman,
@@ -129,44 +159,46 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                           });
                         },
                         color: selectedRole == 'Mother'
-                            ? Color(0xFFBB86FC) // Brighter purple for selection
-                            : Color(0xFFFFE0E0), // Light coral when not selected
+                            ? Color(0xFFBB86FC)
+                            : Color(0xFFFFE0E0),
                         borderColor: selectedRole == 'Mother'
-                            ? Colors.white // White border when selected
-                            : Colors.transparent, // No border when not selected
+                            ? Colors.white
+                            : Colors.transparent,
                       ),
                     ],
                   ),
-                  SizedBox(height: 20), // Added some space before the footer row
+                  SizedBox(height: 20),
                   // Page indicator and next button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Empty space to balance the layout
                       SizedBox(width: 40),
-
-                      // Centered '1 of 3' text
                       Text(
                         '1 of 3',
                         style: TextStyle(color: Colors.black54),
                       ),
-
-                      // Next button aligned to the right
                       ElevatedButton(
-                        onPressed: selectedRole.isNotEmpty
-                            ? () {
+                        onPressed: (nameController.text.isNotEmpty &&
+                            selectedRole.isNotEmpty)
+                            ? () async {
+                          // Store data in Firebase Firestore
+                          await storeDataToFirestore();
+
+                          // Navigate to the next page
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => BabyInfoPage()),
+                            MaterialPageRoute(
+                                builder: (context) => BabyInfoPage()),
                           );
                         }
-                            : null, // Disable button if no role is selected
+                            : null, // Disable button if no role or name is provided
                         style: ElevatedButton.styleFrom(
                           shape: CircleBorder(),
                           padding: EdgeInsets.all(16),
-                          backgroundColor: selectedRole.isNotEmpty
-                              ? Colors.purple.shade300 // Lighter purple for active state
-                              : Colors.grey, // Grey color for inactive state
+                          backgroundColor: (nameController.text.isNotEmpty &&
+                              selectedRole.isNotEmpty)
+                              ? Colors.purple.shade300
+                              : Colors.grey,
                         ),
                         child: Icon(Icons.arrow_forward, color: Colors.white),
                       ),
@@ -186,29 +218,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 class GradientBoxPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    // Define gradient colors
     final Gradient gradient = LinearGradient(
       colors: [
-        Color(0xFFFFF4DE), // Light peach color (top-left)
-        Color(0xFFEEC6A6), // Light orange shade (bottom-right)
+        Color(0xFFFFF4DE),
+        Color(0xFFEEC6A6),
       ],
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
     );
 
-    // Create a paint object with the gradient
     final Paint paint = Paint()
       ..shader = gradient.createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
-    // Create the path for the diagonal slope
     Path path = Path();
-    path.moveTo(size.width, size.height * 0.3); // Lower slope point
-    path.lineTo(0, size.height * 0.6); // Slope to the middle-left
-    path.lineTo(0, 0); // Top-left corner
-    path.lineTo(size.width, 0); // Top-right corner
+    path.moveTo(size.width, size.height * 0.3);
+    path.lineTo(0, size.height * 0.6);
+    path.lineTo(0, 0);
+    path.lineTo(size.width, 0);
     path.close();
 
-    // Draw the gradient path
     canvas.drawPath(path, paint);
   }
 
@@ -223,16 +251,16 @@ class RoleButton extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-  final Color color; // Add color parameter for custom color
-  final Color borderColor; // Add borderColor parameter for custom border color
+  final Color color;
+  final Color borderColor;
 
   RoleButton({
     required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
-    required this.color, // Initialize the custom color
-    required this.borderColor, // Initialize the custom border color
+    required this.color,
+    required this.borderColor,
   });
 
   @override
@@ -241,10 +269,10 @@ class RoleButton extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: color, // Use the passed color
-          borderRadius: BorderRadius.circular(16), // Rounded corners
+          color: color,
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: borderColor, // Use the passed border color
+            color: borderColor,
             width: 2,
           ),
         ),
@@ -257,12 +285,11 @@ class RoleButton extends StatelessWidget {
               child: Icon(icon, size: 30, color: Colors.purple.shade400),
             ),
             SizedBox(height: 8),
-            // Change the text color based on selection
             Text(
               label,
               style: TextStyle(
                 fontSize: 16,
-                color:  Colors.purple.shade400,
+                color: Colors.purple.shade400,
               ),
             ),
           ],
