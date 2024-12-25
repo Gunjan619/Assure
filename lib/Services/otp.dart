@@ -1,7 +1,5 @@
 import 'package:assure/Basic%20Info/Basic.dart';
 import 'package:flutter/material.dart';
-import 'package:assure/Basic%20Info/Basic.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
