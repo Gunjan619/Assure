@@ -3,7 +3,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-class GrowthHistoryScreen extends StatelessWidget {
+import '../bottom_navigator.dart';
+
+class GrowthHistoryScreen extends StatefulWidget {
+  @override
+  State<GrowthHistoryScreen> createState() => _GrowthHistoryScreenState();
+}
+
+class _GrowthHistoryScreenState extends State<GrowthHistoryScreen> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -44,38 +58,9 @@ class GrowthHistoryScreen extends StatelessWidget {
           ],
         ),
         // Bottom Navigation Bar
-        bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Color(0xFFFBE4B2),
-          selectedItemColor: Color(0xFF6C3A82), // Highlight selected icon with deep purple
-          unselectedItemColor: Colors.black54,
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.child_care),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(FontAwesomeIcons.solidCommentDots),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(MdiIcons.tshirtCrew, size: 20),
-                  Icon(FontAwesomeIcons.shoePrints, size: 20),
-                ],
-              ),
-              label: '',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: '',
-            ),
-          ],
+        bottomNavigationBar: CustomBottomNavBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: _onItemTapped,
         ),
       ),
     );
@@ -311,9 +296,9 @@ class HistoryTable extends StatelessWidget {
   HistoryTable({required this.heightMode});
 
   final List<Map<String, String>> historyData = [
-    {'date': '3 Oct 2024', 'age': '9 months', 'value': '3 Kg'}, // Replace with actual data
-    {'date': '5 Sep 2024', 'age': '8 months', 'value': '2.8 Kg'},
-    {'date': '7 Aug 2024', 'age': '7 months', 'value': '2.6 Kg'},
+    {'date': '3 Oct 2024', 'age': '9 months', 'value': '3 m'}, // Replace with actual data
+    {'date': '5 Sep 2024', 'age': '8 months', 'value': '2.8 m'},
+    {'date': '7 Aug 2024', 'age': '7 months', 'value': '2.6 m'},
   ];
 
   @override
@@ -353,7 +338,7 @@ class HistoryTable extends StatelessWidget {
               padding: EdgeInsets.all(8.0),
               child: Text(
                 heightMode ? 'Height' : 'Weight', // Switch between height and weight
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87, fontSize: 13),
               ),
             ),
           ],

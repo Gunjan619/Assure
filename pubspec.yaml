@@ -82,6 +82,8 @@ flutter:
     - Images/graph2.png
     - Images/continue_with_google.png
     - .env
+    - Images/First Blob.png
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

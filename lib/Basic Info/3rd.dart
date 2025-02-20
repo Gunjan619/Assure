@@ -1,6 +1,8 @@
 import 'package:assure/Basic%20Info/weight.dart';
 import 'package:flutter/material.dart';
 
+import '../Home_main.dart';
+
 class BabyDietScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -140,7 +142,7 @@ class BabyDietScreen extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => GrowthHistoryScreen()),
+                            MaterialPageRoute(builder: (context) => Home_main()),
                           );
                         },
                         child: Text("Continue"),
