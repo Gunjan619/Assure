@@ -1,9 +1,10 @@
 import 'package:assure/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'Home.dart';
+import 'Home_main.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; 
-import "package:http/http.dart" as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,7 +16,6 @@ Future<void> main() async {
   } catch (e) {
     print(e);
   }
-  final url = dotenv.env["BACKEND_URL"];
   runApp(const MyApp());
 }
 
@@ -46,12 +46,23 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
+    _checkAuthToken();
+  }
+
+  Future<void> _checkAuthToken() async {
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (authToken != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Home_main()),
+      );
+    } else {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const SignInPage()),
       );
-    });
+    }
   }
 
   @override

@@ -1,9 +1,49 @@
 import 'package:assure/Basic%20Info/weight.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../Home_main.dart';
 
 class BabyDietScreen extends StatelessWidget {
+  final TextEditingController allergiesController = TextEditingController();
+  final TextEditingController solidFoodsController = TextEditingController();
+  final TextEditingController dietaryPreferenceController = TextEditingController();
+
+  // Function to send baby diet data to the backend
+  Future<void> sendBabyDietDataToBackend() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null) {
+      try {
+        final response = await http.put(
+          Uri.parse('$url/api/babies/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'food_allergies': allergiesController.text,
+            'solid_food': solidFoodsController.text,
+            'diet': dietaryPreferenceController.text,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print("Baby diet data successfully sent to the backend!");
+        } else {
+          print("Failed to send baby diet data to the backend: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error sending baby diet data to the backend: $e");
+      }
+    } else {
+      print("Backend URL is not set in the environment variables.");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +69,6 @@ class BabyDietScreen extends StatelessWidget {
                         'Images/logo2.png', // Your logo image asset path
                         height: 60,
                       ),
-
                     ],
                   ),
                   SizedBox(height: 40),
@@ -77,6 +116,7 @@ class BabyDietScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   TextField(
+                    controller: allergiesController,
                     decoration: InputDecoration(
                       hintText: "Eg. Dairy, peanut, sugar",
                       border: OutlineInputBorder(
@@ -96,6 +136,7 @@ class BabyDietScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   TextField(
+                    controller: solidFoodsController,
                     decoration: InputDecoration(
                       hintText: "Choice: Yes/No/Planning to start soon",
                       border: OutlineInputBorder(
@@ -115,6 +156,7 @@ class BabyDietScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   TextField(
+                    controller: dietaryPreferenceController,
                     decoration: InputDecoration(
                       hintText: "Choice: Vegetarian/Non-Vegetarian/Vegan",
                       border: OutlineInputBorder(
@@ -139,7 +181,9 @@ class BabyDietScreen extends StatelessWidget {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          // Send baby diet data to the backend
+                          await sendBabyDietDataToBackend();
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => Home_main()),

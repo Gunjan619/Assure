@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
   @override
@@ -151,6 +152,11 @@ String? phoneNumber; // Variable to store phone number
                     });
                     if (response.statusCode == 200) {
                       // OTP verification successful
+                      final responseData = jsonDecode(response.body);
+                      final authToken = responseData['token'];
+
+                      final storage = FlutterSecureStorage();
+                      await storage.write(key: 'authToken', value: authToken);
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(

@@ -2,10 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore package
 import 'package:firebase_core/firebase_core.dart';
 import 'package:assure/Basic%20Info/2nd.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert'; // Add this line to import dart:convert package
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Initialize Firebase
+  await dotenv.load(fileName: ".env"); // Load environment variables
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     home: WelcomeScreen(),
@@ -33,6 +38,37 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       print("Data successfully stored in Firestore!");
     } catch (e) {
       print("Error storing data: $e");
+    }
+  }
+
+  // Function to send data to the backend
+  Future<void> sendDataToBackend() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null) {
+      try {
+        final response = await http.put(
+          Uri.parse('$url/api/profile/'),
+            headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+            },
+          body: jsonEncode({
+            'name': nameController.text,
+            'role': selectedRole,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print("Data successfully sent to the backend!");
+        } else {
+          print("Failed to send data to the backend: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error sending data to the backend: $e");
+      }
+    } else {
+      print("Backend URL is not set in the environment variables.");
     }
   }
 
@@ -183,7 +219,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             ? () async {
                           // Store data in Firebase Firestore
                           await storeDataToFirestore();
-
+                          // Send data to the backend
+                          await sendDataToBackend();
                           // Navigate to the next page
                           Navigator.push(
                             context,
