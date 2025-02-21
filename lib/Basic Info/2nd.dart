@@ -385,7 +385,7 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   // Date Picker Function

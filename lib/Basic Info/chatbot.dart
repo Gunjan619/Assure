@@ -13,7 +13,7 @@ class ChatBotScreen extends StatefulWidget {
 class _ChatBotScreenState extends State<ChatBotScreen> {
   final TextEditingController _controller = TextEditingController();
   List<Map<String, String>> messages = [
-    {"sender": "user", "message": "Hi there"},
+    // {"sender": "user", "message": "Hi there"},
     {"sender": "bot", "message": "How can I help you?"},
   ];
   int _selectedIndex = 0;

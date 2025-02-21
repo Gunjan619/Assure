@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../bottom_navigator.dart';
 
 class GrowthHistoryScreen extends StatefulWidget {
@@ -18,15 +22,51 @@ class _GrowthHistoryScreenState extends State<GrowthHistoryScreen> {
     });
   }
 
-  void _addData() {
+  Future<void> _addData() async {
     String value = inputController.text.trim();
     if (value.isNotEmpty) {
-      FirebaseFirestore.instance.collection('growth_history').add({
+      // Store data in Firebase
+      await FirebaseFirestore.instance.collection('growth_history').add({
         'type': selectedTab,
         'value': value,
         'date': DateTime.now().toIso8601String(),
       });
+
+      // Send data to the backend
+      await _sendDataToBackend(selectedTab, value);
+
       inputController.clear();
+    }
+  }
+
+  Future<void> _sendDataToBackend(String type, String value) async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null && authToken != null) {
+      try {
+        final response = await http.post(
+          Uri.parse('$url/api/baby-height-weight-logs/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'type': type,
+            'value': value,
+            'date': DateTime.now().toIso8601String(),
+          }),
+        );
+        if (response.statusCode == 200) {
+          print("Growth data successfully sent to the backend!");
+        } else {
+          print("Failed to send growth data to the backend: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error sending growth data to the backend: $e");
+      }
+    } else {
+      print("Backend URL or auth token is not set.");
     }
   }
 
