@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../bottom_navigator.dart';
 
 class GrowthHistoryScreen extends StatefulWidget {
@@ -12,52 +9,99 @@ class GrowthHistoryScreen extends StatefulWidget {
 
 class _GrowthHistoryScreenState extends State<GrowthHistoryScreen> {
   int _selectedIndex = 0;
+  String selectedTab = 'Weight';
+  TextEditingController inputController = TextEditingController();
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
+  void _addData() {
+    String value = inputController.text.trim();
+    if (value.isNotEmpty) {
+      FirebaseFirestore.instance.collection('growth_history').add({
+        'type': selectedTab,
+        'value': value,
+        'date': DateTime.now().toIso8601String(),
+      });
+      inputController.clear();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2, // For Weight and Height tabs
+      length: 2,
       child: Scaffold(
-        backgroundColor: Color(0xFFEFB385), // light beige background
+        backgroundColor: Color(0xFFFFF4DE), // Soft Cream Background
         appBar: AppBar(
           elevation: 0,
-          backgroundColor: Color(0xFFFBE4B2),
+          backgroundColor: Color(0xFFF67E7D), // Coral Pink App Bar
           leading: IconButton(
             icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {},
+            onPressed: () => Navigator.pop(context),
           ),
           title: Text(
             'Growth History',
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(60),
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TabBar(
+                  onTap: (index) => setState(() => selectedTab = index == 0 ? 'Weight' : 'Height'),
+                  indicator: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFC977ED), Color(0xFFF8A16D)], // Gradient Indicator
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  labelPadding: EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+                  labelColor: Colors.black,
+                  unselectedLabelColor: Colors.black54,
+                  tabs: [
+              Tab(
+              child: Text(
+              'Weight',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+              Tab(
+                child: Text(
+                    'Height',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              )
+                ],
+              ),
+            ),
+          ),
         ),
         body: Column(
           children: [
-            // TabBar for Weight and Height
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              color: Color(0xFFEFB385), // Peach background color for the TabBar container
-              child: TabBarWidget(), // Modified TabBar for Weight and Height
-            ),
             Expanded(
               child: TabBarView(
                 children: [
-                  // Weight graph section
-                  WeightTabView(),
-                  // Height graph section
-                  HeightTabView(),
+                  GrowthTabView(
+                      type: 'Weight',
+                      inputController: inputController,
+                      onAdd: _addData),
+                  GrowthTabView(
+                      type: 'Height',
+                      inputController: inputController,
+                      onAdd: _addData),
                 ],
               ),
             ),
           ],
         ),
-        // Bottom Navigation Bar
         bottomNavigationBar: CustomBottomNavBar(
           selectedIndex: _selectedIndex,
           onItemTapped: _onItemTapped,
@@ -67,65 +111,53 @@ class _GrowthHistoryScreenState extends State<GrowthHistoryScreen> {
   }
 }
 
-class TabBarWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Color(0xFFEFB385), // Set the same background color for the container
-      ),
-      padding: const EdgeInsets.all(4),
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      child: TabBar(
-        indicator: BoxDecoration(
-          color: Color(0xFFFBE4B2), // Set this color for the selected tab
-          borderRadius: BorderRadius.circular(10),
-        ),
-        labelColor: Colors.black, // Text color for active tab
-        unselectedLabelColor: Colors.black54, // Text color for inactive tabs
-        tabs: [
-          Tab(
-            child: Text('Weight', style: TextStyle(fontSize: 16)),
-          ),
-          Tab(
-            child: Text('Height', style: TextStyle(fontSize: 16)),
-          ),
-        ],
-      ),
-    );
-  }
-}
+class GrowthTabView extends StatelessWidget {
+  final String type;
+  final TextEditingController inputController;
+  final VoidCallback onAdd;
 
-class WeightTabView extends StatelessWidget {
+  GrowthTabView({
+    required this.type,
+    required this.inputController,
+    required this.onAdd,
+  });
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Weight graph
           Container(
-            color: Color(0xFFEFB385),
             padding: EdgeInsets.all(20),
-            child: Image.asset('Images/graph.png', fit: BoxFit.cover), // Replace with actual graph image
+            child: Image.asset(
+              type == 'Weight' ? 'Images/graph.png' : 'Images/graph2.png',
+              fit: BoxFit.cover,
+            ),
           ),
-          // Past History Table with improved background
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Past History",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.black87,
+          StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('growth_history')
+                .where('type', isEqualTo: type)
+                .snapshots(),
+            builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "No data to show",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                SizedBox(height: 10),
-                Container(
+                );
+              }
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFFFBE4B2), Color(0xFFF67E7D)], // Gradient Background
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
@@ -137,149 +169,59 @@ class WeightTabView extends StatelessWidget {
                     ],
                   ),
                   padding: EdgeInsets.all(12.0),
-                  child: HistoryTable(heightMode: false),
-                ),
-              ],
-            ),
-          ),
-          // Weight Update Section
-          Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Color(0xFFEFB385),
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      hintText: 'Update Your Baby’s Weight',
-                      fillColor: Colors.white,
-                      filled: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF6C3A82), // deep purple
-                    padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: Text('Add', style: TextStyle(fontSize: 16,color: Colors.white)),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class HeightTabView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // Height graph
-          Container(
-            color: Color(0xFFEFB385),
-            padding: EdgeInsets.all(20),
-            child: Image.asset('Images/graph2.png', fit: BoxFit.cover), // Replace with actual graph image
-          ),
-          // Past History Table for height
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Past History",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.4),
-                        spreadRadius: 3,
-                        blurRadius: 8,
-                        offset: Offset(0, 3),
-                      ),
+                  child: Table(
+                    columnWidths: {0: FlexColumnWidth(2), 1: FlexColumnWidth(2), 2: FlexColumnWidth(1)},
+                    border: TableBorder(
+                        horizontalInside:
+                        BorderSide(width: 1, color: Colors.grey[300]!)),
+                    children: [
+                      TableRow(children: [
+                        tableCell('Date', true),
+                        tableCell(type, true),
+                      ]),
+                      ...snapshot.data!.docs.map((doc) {
+                        return TableRow(children: [
+                          tableCell(doc['date'].substring(0, 10), false),
+                          tableCell(doc['value'], false),
+                        ]);
+                      }).toList(),
                     ],
                   ),
-                  padding: EdgeInsets.all(12.0),
-                  child: HistoryTable(heightMode: true),
                 ),
-              ],
-            ),
+              );
+            },
           ),
-          // Height Update Section
-          Container(
+          Padding(
             padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Color(0xFFEFB385),
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 2,
-                  blurRadius: 5,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
+                    controller: inputController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      hintText: 'Update Your Baby’s Height',
+                          borderRadius: BorderRadius.circular(15)),
+                      hintText: 'Update Your Baby’s $type',
                       fillColor: Colors.white,
                       filled: true,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      contentPadding:
+                      EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                     ),
                   ),
                 ),
                 SizedBox(width: 10),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: onAdd,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF6C3A82), // deep purple
+                    backgroundColor: Color(0xFF6C3A82), // Purple Button
                     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+                        borderRadius: BorderRadius.circular(15)),
                   ),
-                  child: Text('Add', style: TextStyle(fontSize: 16,color: Colors.white)),
+                  child: Text(
+                    'Add',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ],
             ),
@@ -288,80 +230,16 @@ class HeightTabView extends StatelessWidget {
       ),
     );
   }
-}
 
-class HistoryTable extends StatelessWidget {
-  final bool heightMode; // Distinguish between weight and height
-
-  HistoryTable({required this.heightMode});
-
-  final List<Map<String, String>> historyData = [
-    {'date': '3 Oct 2024', 'age': '9 months', 'value': '3 m'}, // Replace with actual data
-    {'date': '5 Sep 2024', 'age': '8 months', 'value': '2.8 m'},
-    {'date': '7 Aug 2024', 'age': '7 months', 'value': '2.6 m'},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Table(
-      border: TableBorder(
-        horizontalInside: BorderSide(width: 1, color: Colors.grey[300]!),
-        verticalInside: BorderSide.none,
+  Widget tableCell(String text, bool isHeader) {
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Text(
+        text,
+        style: TextStyle(
+            fontWeight: isHeader ? FontWeight.bold : FontWeight.normal,
+            fontSize: 13),
       ),
-      columnWidths: {
-        0: FlexColumnWidth(2),
-        1: FlexColumnWidth(2),
-        2: FlexColumnWidth(1),
-      },
-      children: [
-        TableRow(
-          decoration: BoxDecoration(
-            color: Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          children: [
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Date',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Age',
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                heightMode ? 'Height' : 'Weight', // Switch between height and weight
-                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87, fontSize: 13),
-              ),
-            ),
-          ],
-        ),
-        ...historyData.map((row) {
-          return TableRow(
-            children: [
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(row['date']!, style: TextStyle(color: Colors.black87)),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(row['age']!, style: TextStyle(color: Colors.black87)),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(row['value']!, style: TextStyle(color: Colors.black87)),
-              ),
-            ],
-          );
-        }).toList(),
-      ],
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../bottom_navigator.dart';
 import 'ask_question.dart';
 
@@ -21,7 +20,7 @@ class _ForumPageState extends State<ForumPage> {
   }
 
   TextEditingController _commentController = TextEditingController();
-  String? selectedQuestionId;
+  String? selectedQuestionId; // Tracks the currently selected question ID
 
   void postComment(String questionId) async {
     if (_commentController.text.trim().isEmpty) return;
@@ -39,11 +38,11 @@ class _ForumPageState extends State<ForumPage> {
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
-      backgroundColor: Color(0xFFFCE5C0),
+      backgroundColor: Color(0xFFEEC6A6),
       appBar: AppBar(
         title: const Text("Forum", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
         centerTitle: true,
-        backgroundColor: Color(0xFFFCE5C0),
+        backgroundColor: Color(0xFFF67E7D),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -78,47 +77,88 @@ class _ForumPageState extends State<ForumPage> {
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      selectedQuestionId = question.id;
+                      // Toggle the comment section
+                      if (selectedQuestionId == question.id) {
+                        selectedQuestionId = null; // Close the comment section
+                      } else {
+                        selectedQuestionId = question.id; // Open the comment section
+                      }
                     });
                   },
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border(bottom: BorderSide(color: Colors.black, width: 1)),
+                      gradient: LinearGradient(
+                        colors: [Color(0xFFFBE4B2), Color(0xFFF67E7D)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 6,
+                          offset: Offset(2, 4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: Colors.grey[400],
+                              child: Icon(Icons.person, color: Colors.white),
+                            ),
+                            SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "User Name", // Replace with actual username
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                                ),
+                                Text(
+                                  "2 hours ago", // Replace with actual timestamp
+                                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
                         Text(
                           question['title'],
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                         ),
-                        const SizedBox(height: 5),
+                        SizedBox(height: 5),
                         Text(
                           question['description'],
-                          style: const TextStyle(fontSize: 15, color: Colors.black87),
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.thumb_up_alt_outlined, color: Colors.black),
+                                  icon: Icon(Icons.thumb_up_alt_outlined, color: Colors.black),
                                   onPressed: () {},
                                 ),
+                                Text("12", style: TextStyle(color: Colors.black)), // Like count
+                                SizedBox(width: 10),
                                 IconButton(
-                                  icon: const Icon(Icons.thumb_down_alt_outlined, color: Colors.black),
+                                  icon: Icon(Icons.thumb_down_alt_outlined, color: Colors.black),
                                   onPressed: () {},
                                 ),
+                                Text("2", style: TextStyle(color: Colors.black)), // Dislike count
                               ],
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete_forever_rounded, color: Colors.black),
+                              icon: Icon(Icons.delete_forever_rounded, color: Colors.black),
                               onPressed: () async {
                                 await FirebaseFirestore.instance.collection('questions').doc(question.id).delete();
                               },
@@ -127,23 +167,90 @@ class _ForumPageState extends State<ForumPage> {
                         ),
                         if (selectedQuestionId == question.id) ...[
                           StreamBuilder(
-                            stream: FirebaseFirestore.instance.collection('questions').doc(question.id).collection('comments').orderBy('timestamp', descending: true).snapshots(),
+                            stream: FirebaseFirestore.instance
+                                .collection('questions')
+                                .doc(question.id)
+                                .collection('comments')
+                                .orderBy('timestamp', descending: true)
+                                .snapshots(),
                             builder: (context, AsyncSnapshot<QuerySnapshot> commentSnapshot) {
                               if (!commentSnapshot.hasData || commentSnapshot.data!.docs.isEmpty) {
-                                return const Text("No comments yet", style: TextStyle(color: Colors.black54));
+                                return Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text(
+                                    "No comments yet",
+                                    style: TextStyle(color: Colors.black54, fontStyle: FontStyle.italic),
+                                  ),
+                                );
                               }
 
                               return Column(
-                                children: commentSnapshot.data!.docs.map((comment) {
-                                  return Card(
-                                    color: Colors.grey[200],
-                                    margin: EdgeInsets.symmetric(vertical: 4),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8),
-                                      child: Text(comment['text'], style: TextStyle(color: Colors.black)),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                                    child: Text(
+                                      "Comments",
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                                     ),
-                                  );
-                                }).toList(),
+                                  ),
+                                  Divider(color: Colors.black38, thickness: 0.5),
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: commentSnapshot.data!.docs.length,
+                                    itemBuilder: (context, index) {
+                                      var comment = commentSnapshot.data!.docs[index];
+
+                                      return Container(
+                                        margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                                        padding: EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 4,
+                                              offset: Offset(1, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            CircleAvatar(
+                                              backgroundColor: Colors.grey[400],
+                                              child: Icon(Icons.person, color: Colors.white),
+                                            ),
+                                            SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "User", // Replace with actual username
+                                                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    comment['text'],
+                                                    style: TextStyle(color: Colors.black),
+                                                  ),
+                                                  SizedBox(height: 4),
+                                                  Text(
+                                                    "Just now", // Replace with formatted timestamp
+                                                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
                               );
                             },
                           ),

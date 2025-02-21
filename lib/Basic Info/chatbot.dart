@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../bottom_navigator.dart';
 
 class ChatBotScreen extends StatefulWidget {
@@ -34,25 +33,35 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Color(0xFFF8A16D), // Orange background
-        appBar: AppBar(
-          backgroundColor: Color(0xFFFCEEC1), // Light beige
-          elevation: 0,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () {},
-          ),
-          title: Text(
-            "Chat Bot",
-            style: TextStyle(color: Colors.black),
-          ),
-          centerTitle: true,
+      extendBodyBehindAppBar: true, // Allows gradient to extend behind AppBar
+      appBar: AppBar(
+        backgroundColor: Color(0xFFFCEEC1),
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {
+            Navigator.pop(context); // ✅ Goes back to the previous page
+          },
         ),
-        body: Column(
+        title: Text(
+          "Chat Bot",
+          style: TextStyle(color: Colors.black),
+        ),
+        centerTitle: true,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF67E7D), Color(0xFFF8A16D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
           children: [
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.only(left: 16, right: 16, top: 90, bottom: 20),
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final message = messages[index];
@@ -60,24 +69,42 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                   return Align(
                     alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
-                      margin: EdgeInsets.symmetric(vertical: 5),
-                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.symmetric(vertical: 6),
+                      padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: isUser ? Color(0xFFFCEEC1) : Colors.black.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(15),
+                        color: isUser ? Color(0xFFFCEEC1) : Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          topRight: Radius.circular(20),
+                          bottomLeft: isUser ? Radius.circular(20) : Radius.zero,
+                          bottomRight: isUser ? Radius.zero : Radius.circular(20),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 5,
+                            spreadRadius: 1,
+                            offset: Offset(0, 2),
+                          )
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (!isUser) Icon(Icons.auto_awesome, size: 16, color: Colors.black),
-                          SizedBox(width: 5),
+                          if (!isUser)
+                            Icon(Icons.smart_toy, size: 18, color: Colors.white70),
+                          SizedBox(width: 6),
                           Text(
                             message["message"]!,
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: isUser ? Colors.black87 : Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           if (isUser) ...[
-                            SizedBox(width: 5),
-                            Icon(Icons.person, color: Colors.black),
+                            SizedBox(width: 6),
+                            Icon(Icons.person, color: Colors.black87),
                           ],
                         ],
                       ),
@@ -89,45 +116,47 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
 
             // Message Input Field
             Padding(
-              padding: EdgeInsets.all(10),
+              padding: EdgeInsets.all(12),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _controller,
+                      style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
+                        hintText: "Type your message...",
+                        hintStyle: TextStyle(color: Colors.white70),
                         filled: true,
-                        fillColor: Color(0xFFF9CBA5), // Light orange
+                        fillColor: Colors.white.withOpacity(0.2),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(20),
                           borderSide: BorderSide.none,
                         ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       ),
                     ),
                   ),
                   SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: sendMessage,
-                    style: ElevatedButton.styleFrom(
+                  GestureDetector(
+                    onTap: sendMessage,
+                    child: CircleAvatar(
+                      radius: 26,
                       backgroundColor: Colors.purple,
-                      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      child: Icon(Icons.send, color: Colors.white, size: 22),
                     ),
-                    child: Text("Send", style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
 
-        // Bottom Navigation Bar
+      // Bottom Navigation Bar
       bottomNavigationBar: CustomBottomNavBar(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
-        );
-    }
+    );
+  }
 }
