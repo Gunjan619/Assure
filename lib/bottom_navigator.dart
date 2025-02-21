@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'Basic Info/Blog.dart';
-import 'Basic Info/Memo.dart';
 import 'Basic Info/chatbot.dart';
-import 'Basic Info/forum.dart';
-import 'Basic Info/weight.dart';
 import 'babyinfog.dart';
 
 
@@ -27,7 +23,7 @@ class CustomBottomNavBar extends StatelessWidget {
           // BabyInfoPageEdit screen open karega
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => BabyInfoPageEdit()),
+            MaterialPageRoute(builder: (context) => BabyInfoPage()),
           );
         } else if (index == 2) {
           // ChatBotScreen open karega

@@ -1,5 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firebase Firestore package
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:assure/Basic%20Info/2nd.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -27,14 +28,29 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   TextEditingController nameController = TextEditingController(); // Controller for name input
 
   // Function to store data in Firebase Firestore
+
   Future<void> storeDataToFirestore() async {
     try {
-      // Reference Firestore and add data
-      await FirebaseFirestore.instance.collection('users').add({
-        'name': nameController.text,
+      // Get the current user
+      final User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("No user is logged in.");
+        return;
+      }
+
+      // Log the data being sent to Firestore
+      print("Storing data: name=${nameController.text.trim()}, role=$selectedRole");
+
+      // Add data to Firestore with the user's UID as the document ID
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid) // Use the user's UID as the document ID
+          .set({
+        'name': nameController.text.trim(),
         'role': selectedRole,
-        'timestamp': FieldValue.serverTimestamp(), // To store the creation time
+        'timestamp': FieldValue.serverTimestamp(),
       });
+
       print("Data successfully stored in Firestore!");
     } catch (e) {
       print("Error storing data: $e");
@@ -75,175 +91,168 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // Ensures screen resizes when the keyboard appears
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // Custom painter with gradient sloping from right to left
-          CustomPaint(
-            size: Size(double.infinity, MediaQuery.of(context).size.height),
-            painter: GradientBoxPainter(),
-          ),
-          SingleChildScrollView(
-            // Allows scrolling when the keyboard is visible
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: 50),
-                  // Logo with text
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'Images/logo2.png', // Add your logo asset here
-                        height: 60,
-                      ),
-                      SizedBox(width: 8), // Small gap between logo and text
-                    ],
-                  ),
-                  SizedBox(height: 40),
-                  // Welcome text
-                  Text(
-                    'Welcome',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  // Subtitle
-                  Text(
-                    "Let's start by learning a little about you.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF5A5A5A),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 30),
-                  // Avatar upload section
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Color(0xFFBB86FC),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'Images/Avatar.png', // Add your avatar image here
-                        width: 90,
-                        height: 90,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  SizedBox(height: 30),
-                  // Name input field
-                  TextField(
-                    controller: nameController, // Connect controller to TextField
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      labelText: "What's your name?",
-                      labelStyle: TextStyle(color: Colors.black54),
-                      contentPadding: EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide:
-                        BorderSide(color: Colors.purple.shade400),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  // Role selection section
-                  Text(
-                    "What's your role?",
-                    style: TextStyle(fontSize: 18, color: Colors.black54),
-                  ),
-                  SizedBox(height: 10),
-                  // Role selection buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      RoleButton(
-                        icon: Icons.man,
-                        label: 'Father',
-                        isSelected: selectedRole == 'Father',
-                        onTap: () {
-                          setState(() {
-                            selectedRole = 'Father';
-                          });
-                        },
-                        color: selectedRole == 'Father'
-                            ? Color(0xFFBB86FC)
-                            : Color(0xFFFFE0E0),
-                        borderColor: selectedRole == 'Father'
-                            ? Colors.white
-                            : Colors.transparent,
-                      ),
-                      RoleButton(
-                        icon: Icons.woman,
-                        label: 'Mother',
-                        isSelected: selectedRole == 'Mother',
-                        onTap: () {
-                          setState(() {
-                            selectedRole = 'Mother';
-                          });
-                        },
-                        color: selectedRole == 'Mother'
-                            ? Color(0xFFBB86FC)
-                            : Color(0xFFFFE0E0),
-                        borderColor: selectedRole == 'Mother'
-                            ? Colors.white
-                            : Colors.transparent,
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  // Page indicator and next button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 40),
-                      Text(
-                        '1 of 3',
-                        style: TextStyle(color: Colors.black54),
-                      ),
-                      ElevatedButton(
-                        onPressed: (nameController.text.isNotEmpty &&
-                            selectedRole.isNotEmpty)
-                            ? () async {
-                          // Store data in Firebase Firestore
-                          await storeDataToFirestore();
-                          // Send data to the backend
-                          await sendDataToBackend();
-                          // Navigate to the next page
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BabyInfoPage()),
-                          );
-                        }
-                            : null, // Disable button if no role or name is provided
-                        style: ElevatedButton.styleFrom(
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(16),
-                          backgroundColor: (nameController.text.isNotEmpty &&
-                              selectedRole.isNotEmpty)
-                              ? Colors.purple.shade300
-                              : Colors.grey,
-                        ),
-                        child: Icon(Icons.arrow_forward, color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+          Positioned.fill(
+            child: CustomPaint(
+              size: Size(double.infinity, MediaQuery.of(context).size.height),
+              painter: GradientBoxPainter(),
             ),
+          ),
+          Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 50),
+                        Image.asset(
+                          'Images/logo2.png',
+                          height: 60,
+                        ),
+                        SizedBox(height: 40),
+                        Text(
+                          'Welcome',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "Let's start by learning a little about you.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF5A5A5A),
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 30),
+                        CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Color(0xFFBB86FC),
+                          child: ClipOval(
+                            child: Image.asset(
+                              'Images/Avatar.png',
+                              width: 90,
+                              height: 90,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                        TextField(
+                          controller: nameController,
+                          cursorColor: Colors.black,
+                          decoration: InputDecoration(
+                            labelText: "What's your name?",
+                            labelStyle: TextStyle(color: Colors.black54),
+                            contentPadding: EdgeInsets.symmetric(
+                                vertical: 16, horizontal: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.grey.shade300),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(color: Colors.purple.shade400),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {}); // Update the button state dynamically
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          "What's your role?",
+                          style: TextStyle(fontSize: 18, color: Colors.black54),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            RoleButton(
+                              icon: Icons.man,
+                              label: 'Father',
+                              isSelected: selectedRole == 'Father',
+                              onTap: () {
+                                setState(() {
+                                  selectedRole = 'Father';
+                                });
+                              },
+                              color: selectedRole == 'Father'
+                                  ? Color(0xFFBB86FC)
+                                  : Color(0xFFFFE0E0),
+                              borderColor: selectedRole == 'Father'
+                                  ? Colors.white
+                                  : Colors.transparent,
+                            ),
+                            RoleButton(
+                              icon: Icons.woman,
+                              label: 'Mother',
+                              isSelected: selectedRole == 'Mother',
+                              onTap: () {
+                                setState(() {
+                                  selectedRole = 'Mother';
+                                });
+                              },
+                              color: selectedRole == 'Mother'
+                                  ? Color(0xFFBB86FC)
+                                  : Color(0xFFFFE0E0),
+                              borderColor: selectedRole == 'Mother'
+                                  ? Colors.white
+                                  : Colors.transparent,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 70),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(width: 40),
+                            Text(
+                              '1 of 3',
+                              style: TextStyle(color: Colors.black54),
+                            ),
+                            ElevatedButton(
+                              onPressed: (nameController.text.isNotEmpty &&
+                                  selectedRole.isNotEmpty)
+                                  ? () async {
+                                await storeDataToFirestore();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => BabyInfoPage()),
+                                );
+                              }
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(),
+                                padding: EdgeInsets.all(16),
+                                backgroundColor: (nameController.text.isNotEmpty &&
+                                    selectedRole.isNotEmpty)
+                                    ? Colors.purple.shade300
+                                    : Colors.grey,
+                              ),
+                              child: Icon(Icons.arrow_forward, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -251,14 +260,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 }
 
-// Custom Painter to draw gradient with a right-to-left slope
+// Gradient Background Painter
 class GradientBoxPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Gradient gradient = LinearGradient(
       colors: [
         Color(0xFFFFF4DE),
-        Color(0xFFEEC6A6),
+        Color(0xFF8B3A3A)
       ],
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
@@ -283,6 +292,7 @@ class GradientBoxPainter extends CustomPainter {
   }
 }
 
+// Role Button
 class RoleButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -316,22 +326,14 @@ class RoleButton extends StatelessWidget {
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.white,
-              child: Icon(icon, size: 30, color: Colors.purple.shade400),
-            ),
+            Icon(icon, size: 30, color: Colors.purple.shade400),
             SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.purple.shade400,
-              ),
-            ),
+            Text(label, style: TextStyle(fontSize: 16, color: Colors.purple.shade400)),
           ],
         ),
       ),
     );
   }
 }
+
+

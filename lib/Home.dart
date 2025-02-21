@@ -47,7 +47,7 @@ class SignInPage extends StatelessWidget {
         if (response.statusCode == 200) {
           final responseData = jsonDecode(response.body);
           final authToken = responseData['token'];
-          
+
           final storage = FlutterSecureStorage();
           await storage.write(key: 'authToken', value: authToken);
           // // Proceed with navigation or other actions
@@ -63,7 +63,7 @@ class SignInPage extends StatelessWidget {
           //   SnackBar(content: Text("Backend error")),
           // );
         }
-        
+
         // Sign in to Firebase with the Google credential
         UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
         return userCredential.user;
@@ -130,7 +130,7 @@ class SignInPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
+                  children: [
                     const SizedBox(width: 15),
                     Image.asset(
                       'Images/continue_with_google.png',
