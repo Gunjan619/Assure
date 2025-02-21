@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'bottom_navigator.dart';
 
@@ -11,12 +15,81 @@ class BabyInfoPageEdit extends StatefulWidget {
 
 class _BabyInfoPageEditState extends State<BabyInfoPageEdit> {
   int _selectedIndex = 0;
+  final TextEditingController _babyNameController = TextEditingController();
+  final TextEditingController _babyDobController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBabyInfo();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
+
+  Future<void> _fetchBabyInfo() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null && authToken != null) {
+      try {
+        final response = await http.get(
+          Uri.parse('$url/api/babies/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+        );
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          setState(() {
+            _babyNameController.text = responseData['name'];
+            _babyDobController.text = responseData['dob'];
+          });
+        } else {
+          print("Failed to fetch baby info from the backend: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error fetching baby info from the backend: $e");
+      }
+    } else {
+      print("Backend URL or auth token is not set.");
+    }
+  }
+
+  Future<void> _updateBabyInfo() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null && authToken != null) {
+      try {
+        final response = await http.put(
+          Uri.parse('$url/api/babies/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'name': _babyNameController.text,
+            'dob': _babyDobController.text,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print("Baby info successfully updated!");
+        } else {
+          print("Failed to update baby info: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error updating baby info: $e");
+      }
+    } else {
+      print("Backend URL or auth token is not set.");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,6 +138,7 @@ class _BabyInfoPageEditState extends State<BabyInfoPageEdit> {
                   Text("Baby Name"),
                   SizedBox(height: 5),
                   TextField(
+                    controller: _babyNameController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -77,6 +151,7 @@ class _BabyInfoPageEditState extends State<BabyInfoPageEdit> {
                   Text("Baby date of birth"),
                   SizedBox(height: 5),
                   TextField(
+                    controller: _babyDobController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -89,7 +164,9 @@ class _BabyInfoPageEditState extends State<BabyInfoPageEdit> {
                   // Save Button
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        await _updateBabyInfo();
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue, // Blue button
                         padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
