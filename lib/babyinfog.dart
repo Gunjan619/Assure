@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'bottom_navigator.dart';
 
 class BabyInfoPage extends StatefulWidget {
@@ -120,6 +124,14 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
       print("Error saving baby info: $e");
     }
   }
+  final TextEditingController _babyNameController = TextEditingController();
+  final TextEditingController _babyDobController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBabyInfo();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -131,6 +143,67 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
     setState(() {
       _isEditMode = !_isEditMode;
     });
+  }
+
+
+  Future<void> _fetchBabyInfo() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null && authToken != null) {
+      try {
+        final response = await http.get(
+          Uri.parse('$url/api/babies/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+        );
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          setState(() {
+            _babyNameController.text = responseData['name'];
+            _babyDobController.text = responseData['dob'];
+          });
+        } else {
+          print("Failed to fetch baby info from the backend: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error fetching baby info from the backend: $e");
+      }
+    } else {
+      print("Backend URL or auth token is not set.");
+    }
+  }
+
+  Future<void> _updateBabyInfo() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null && authToken != null) {
+      try {
+        final response = await http.put(
+          Uri.parse('$url/api/babies/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          body: jsonEncode({
+            'name': _babyNameController.text,
+            'dob': _babyDobController.text,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print("Baby info successfully updated!");
+        } else {
+          print("Failed to update baby info: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error updating baby info: $e");
+      }
+    } else {
+      print("Backend URL or auth token is not set.");
+    }
   }
 
   @override

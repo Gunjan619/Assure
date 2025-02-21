@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../bottom_navigator.dart';
 
 class ChatBotScreen extends StatefulWidget {
@@ -20,12 +24,42 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     });
   }
 
-  void sendMessage() {
+  Future<void> sendMessage() async {
     if (_controller.text.isNotEmpty) {
       setState(() {
         messages.add({"sender": "user", "message": _controller.text});
-        messages.add({"sender": "bot", "message": "I'm here to assist you!"});
       });
+
+      final url = dotenv.env['BACKEND_URL'];
+      final storage = FlutterSecureStorage();
+      final authToken = await storage.read(key: 'authToken');
+      if (url != null && authToken != null) {
+        try {
+          final response = await http.post(
+            Uri.parse('$url/api/chat-bot/'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: jsonEncode({
+              'message': _controller.text,
+            }),
+          );
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            setState(() {
+              messages.add({"sender": "bot", "message": responseData['reply']});
+            });
+          } else {
+            print("Failed to get response from the backend: ${response.statusCode}");
+          }
+        } catch (e) {
+          print("Error sending message to the backend: $e");
+        }
+      } else {
+        print("Backend URL or auth token is not set.");
+      }
+
       _controller.clear();
     }
   }

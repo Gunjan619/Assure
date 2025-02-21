@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '3rd.dart';
@@ -52,6 +56,39 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
     } catch (e) {
       // Handle errors (e.g., network issues, permission issues)
       print("Error fetching parent name: $e");
+    }
+  }
+
+  // Function to send baby data to the backend
+  Future<void> sendBabyDataToBackend() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null) {
+      try {
+        final response = await http.post(
+          Uri.parse('$url/api/babies/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+            body: jsonEncode({
+            'name': _babyNameController.text,
+            'weight': _babyWeightController.text,
+            'gender': _selectedGender,
+            'dob': _selectedDate != null ? DateFormat('yyyy-MM-dd').format(_selectedDate!) : null,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print("Baby data successfully sent to the backend!");
+        } else {
+          print("Failed to send baby data to the backend: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error sending baby data to the backend: $e");
+      }
+    } else {
+      print("Backend URL is not set in the environment variables.");
     }
   }
 
@@ -286,63 +323,68 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
     ),
     ),
 
-    // Bottom Navigation Buttons
-    Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-    child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-    TextButton(
-    onPressed: () {
-    // Logic for Previous Button
-    },
-    child: Text(
-    'Prev',
-    style: TextStyle(
-    fontSize: 16,
-    color: Colors.blue),
-    ),
-    ),
-    Text('2 of 3', style: TextStyle(color: Colors.black54)),
-    ElevatedButton(
-    onPressed: () async {
-    if (_babyNameController.text.isNotEmpty &&
-    _babyWeightController.text.isNotEmpty &&
-    _selectedDate != null &&
-    _selectedGender != null) {
-    // Save baby's information to Firestore
-    await _storeBabyInfo();
+          // Bottom Navigation Buttons
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    // Logic for Previous Button
+                  },
+                  child: const Text(
+                    'Prev',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+                const Text('2 of 3'), // Step Indicator
+                ElevatedButton(
+                  onPressed: () async{
+                    // Add your navigation or submission logic here
+                    if (_babyNameController.text.isNotEmpty &&
+                        _babyWeightController.text.isNotEmpty &&
+                        _selectedDate != null &&
+                        _selectedGender != null) {
+                      // Handle valid input
+                      print('Baby Name: ${_babyNameController.text}');
+                      print('Baby Weight: ${_babyWeightController.text}');
+                      print('Baby Gender: $_selectedGender');
+                      print('Baby Date of Birth: ${_selectedDate.toString()}');
+                      await sendBabyDataToBackend();
 
-    // Navigate to the next screen
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => BabyDietScreen()),
-    );
-    } else {
-    // Show error message if any field is empty
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('Please fill in all fields')),
-    );
-    }
-    },
-    style: ElevatedButton.styleFrom(
-    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-    shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-    ),
-    backgroundColor: Colors.purple.shade300,
-    ),
-    child: Text(
-    'Next',
-    style: TextStyle(color: Colors.white, fontSize: 18),
-    ),
-    ),
-    ],
-    ),
-    ),
-    ],
-    ),
-    ),
+                      await _storeBabyInfo();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => BabyDietScreen()),
+                      );
+                    } else {
+                      // Handle error for invalid input
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Please fill in all fields')),
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor: Colors.purple.shade300,
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

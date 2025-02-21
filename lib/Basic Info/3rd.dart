@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../Home_main.dart';
@@ -66,7 +70,38 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
     }
   }
 
-  @override
+  Future<void> sendBabyDietDataToBackend() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null) {
+      try {
+        final response = await http.put(
+          Uri.parse('$url/api/babies/'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $authToken',
+          },
+          
+          body: jsonEncode({
+            'food_allergies': _allergiesController.text,
+            'solid_food': _solidFoodsController.text,
+            'diet': _dietaryPreferenceController.text,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print("Baby diet data successfully sent to the backend!");
+        } else {
+          print("Failed to send baby diet data to the backend: ${response.statusCode}");
+        }
+      } catch (e) {
+        print("Error sending baby diet data to the backend: $e");
+      }
+    } else {
+      print("Backend URL is not set in the environment variables.");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -183,8 +218,9 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
                           ElevatedButton(
                             onPressed: _isLoading
                                 ? null
-                                : () {
+                                : () async{
                               _storeDietInfo(context);
+                              await sendBabyDietDataToBackend();
                             },
                             child: _isLoading
                                 ? CircularProgressIndicator(color: Colors.white)
