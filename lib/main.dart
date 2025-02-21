@@ -1,7 +1,7 @@
+import 'package:assure/Home_main.dart';
 import 'package:assure/firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'Home.dart';
-import 'Home_main.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -56,12 +56,12 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
 
-        MaterialPageRoute(builder: (context) => Home_main()),
+        MaterialPageRoute(builder: (context) => SignInPage()),
       );
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const SignInPage()),
+        MaterialPageRoute(builder: (context) =>  Home_main()),
       );
     }
   }

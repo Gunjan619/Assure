@@ -35,13 +35,8 @@ class _Home_mainState extends State<Home_main> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 50),
-            Center(
-              child: Image.asset(
-                "Images/First Blob.png",
-                height: 150,
-              ),
-            ),
-            SizedBox(height: 40),
+            BabyMilestoneCard(),
+            SizedBox(height: 10),
 
             // Activity Cards Grid
             GridView.count(
@@ -174,6 +169,11 @@ class _Home_mainState extends State<Home_main> {
                   Container(
                     height: 120,
                     decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage("Images/banner.jpg"), // Replace with your image
+                        fit: BoxFit.cover,
+                      ),
+
                       borderRadius: BorderRadius.circular(12),
                       color: Colors.grey[300],
                     ),
@@ -315,4 +315,117 @@ class FeatureIcon extends StatelessWidget {
       ),
     );
   }
+}
+
+class BabyMilestoneCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white, // White background for the card
+        borderRadius: BorderRadius.circular(20), // Rounded corners
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black12, // Soft shadow
+              blurRadius: 10,
+              spreadRadius: 2,
+              offset: Offset(0, 4),
+          )
+              ],
+          gradient: LinearGradient(
+          colors: [
+          Color(0xFFFFF4DE), // Soft Cream
+          Color(0xFFF8A16D), // Light Coral
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+    ),
+    child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+    // Baby Image/Animation
+    Container(
+    width: 80,
+    height: 80,
+    decoration: BoxDecoration(
+    shape: BoxShape.circle,
+    image: DecorationImage(
+    image: AssetImage("Images/First Blob.png"), // Replace with your image
+    fit: BoxFit.cover,
+    ),
+    border: Border.all(
+    color: Color(0xFFF67E7D), // Coral Pink border
+    width: 2,
+    ),
+    ),
+    ),
+    SizedBox(width: 16),
+
+    // Milestone Details
+    Expanded(
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    // Baby Name
+    Text(
+    "Baby Name",
+    style: TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: Color(0xFF6C3A82), // Purple text
+    ),
+    ),
+    SizedBox(height: 8),
+
+    // Progress Bar
+    LinearProgressIndicator(
+    value: 0.6, // Dynamic progress value
+    backgroundColor: Colors.grey[200],
+    valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF67E7D)), // Coral Pink
+    ),
+    SizedBox(height: 8),
+
+    // Active Milestone
+    Text(
+    "Active Milestone: First 3 Months",
+    style: TextStyle(
+    fontSize: 14,
+    color: Color(0xFF6C3A82).withOpacity(0.8), // Purple with opacity
+    ),
+    ),
+    SizedBox(height: 8),
+
+    // Icons and Stats
+    Row(
+    children: [
+    Icon(Icons.access_time, size: 16, color: Color(0xFF6C3A82)), // Purple icon
+    SizedBox(width: 4),
+    Text(
+    "45m",
+    style: TextStyle(
+    fontSize: 14,
+    color: Color(0xFF6C3A82).withOpacity(0.8), // Purple text
+    ),
+    ),
+    SizedBox(width: 16),
+    Icon(Icons.cake, size: 16, color: Color(0xFF6C3A82)), // Purple icon
+    SizedBox(width: 4),
+    Text(
+    "3.5kg",
+    style: TextStyle(
+    fontSize: 14,
+    color: Color(0xFF6C3A82).withOpacity(0.8), // Purple text
+    ),
+    ),
+    ],
+    ),
+    ],
+    ),
+    ),
+    ],
+    ),
+    );
+    }
 }

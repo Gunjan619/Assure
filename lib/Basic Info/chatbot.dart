@@ -13,7 +13,6 @@ class ChatBotScreen extends StatefulWidget {
 class _ChatBotScreenState extends State<ChatBotScreen> {
   final TextEditingController _controller = TextEditingController();
   List<Map<String, String>> messages = [
-    // {"sender": "user", "message": "Hi there"},
     {"sender": "bot", "message": "How can I help you?"},
   ];
   int _selectedIndex = 0;
@@ -33,6 +32,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       final url = dotenv.env['BACKEND_URL'];
       final storage = FlutterSecureStorage();
       final authToken = await storage.read(key: 'authToken');
+      print(authToken);
       if (url != null && authToken != null) {
         try {
           final response = await http.post(
@@ -68,13 +68,14 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true, // Allows gradient to extend behind AppBar
+      resizeToAvoidBottomInset: true, // Ensures content resizes when keyboard opens
       appBar: AppBar(
         backgroundColor: Color(0xFFFCEEC1),
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // ✅ Goes back to the previous page
+            Navigator.pop(context); // Goes back to the previous page
           },
         ),
         title: Text(
@@ -93,6 +94,7 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
         ),
         child: Column(
           children: [
+            // Chat Messages
             Expanded(
               child: ListView.builder(
                 padding: EdgeInsets.only(left: 16, right: 16, top: 90, bottom: 20),
@@ -122,25 +124,32 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
                           )
                         ],
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (!isUser)
-                            Icon(Icons.smart_toy, size: 18, color: Colors.white70),
-                          SizedBox(width: 6),
-                          Text(
-                            message["message"]!,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: isUser ? Colors.black87 : Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          if (isUser) ...[
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.8, // Limit message width
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isUser)
+                              Icon(Icons.smart_toy, size: 18, color: Colors.white70),
                             SizedBox(width: 6),
-                            Icon(Icons.person, color: Colors.black87),
+                            Flexible(
+                              child: Text(
+                                message["message"]!,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: isUser ? Colors.black87 : Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            if (isUser) ...[
+                              SizedBox(width: 6),
+                              Icon(Icons.person, color: Colors.black87),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   );

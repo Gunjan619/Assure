@@ -44,7 +44,10 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
   // Fetch baby info from Firestore
   Future<void> _fetchBabyInfo() async {
     final User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      print("User is not logged in.");
+      return;
+    }
 
     try {
       final DocumentSnapshot userDoc = await FirebaseFirestore.instance
@@ -54,12 +57,11 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
 
       if (userDoc.exists) {
         final Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+        print("User data: $userData");
 
-        // Fetch parent's name and role
         final String name = userData?['name'] ?? "Not Available";
         final String role = userData?['role'] ?? "Not Available";
 
-        // Fetch baby info
         final DocumentSnapshot babyInfoDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
@@ -69,6 +71,7 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
 
         if (babyInfoDoc.exists) {
           final Map<String, dynamic>? babyData = babyInfoDoc.data() as Map<String, dynamic>?;
+          print("Baby data: $babyData");
 
           setState(() {
             babyInfo = {
@@ -88,7 +91,11 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
             _motherNameController.text = babyInfo["motherName"]!;
             _fatherNameController.text = babyInfo["fatherName"]!;
           });
+        } else {
+          print("Baby info document does not exist.");
         }
+      } else {
+        print("User document does not exist.");
       }
     } catch (e) {
       print("Error fetching baby info: $e");
@@ -124,9 +131,6 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
       print("Error saving baby info: $e");
     }
   }
- 
-  final TextEditingController _babyDobController = TextEditingController();
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -138,68 +142,6 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
     setState(() {
       _isEditMode = !_isEditMode;
     });
-  }
-
-
-  Future<void> _fetchBabyInfoFromBackend() async {
-    final url = dotenv.env['BACKEND_URL'];
-    final storage = FlutterSecureStorage();
-    final authToken = await storage.read(key: 'authToken');
-    if (url != null && authToken != null) {
-      try {
-        final response = await http.get(
-          Uri.parse('$url/api/babies/'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $authToken',
-          },
-        );
-        if (response.statusCode == 200) {
-          final responseData = jsonDecode(response.body);
-          setState(() {
-            _babyNameController.text = responseData['name'];
-            _babyDobController.text = responseData['dob'];
-          });
-        } else {
-          print("Failed to fetch baby info from the backend: ${response.statusCode}");
-        }
-      } catch (e) {
-        print("Error fetching baby info from the backend: $e");
-      }
-    } else {
-      print("Backend URL or auth token is not set.");
-    }
-  }
-
-  Future<void> _updateBabyInfoFromBackend() async {
-    final url = dotenv.env['BACKEND_URL'];
-    final storage = FlutterSecureStorage();
-    final authToken = await storage.read(key: 'authToken');
-    if (url != null && authToken != null) {
-      try {
-        final response = await http.put(
-          Uri.parse('$url/api/babies/'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $authToken',
-          },
-          body: jsonEncode({
-            'name': _babyNameController.text,
-            'dob': _babyDobController.text,
-            
-          }),
-        );
-        if (response.statusCode == 200) {
-          print("Baby info successfully updated!");
-        } else {
-          print("Failed to update baby info: ${response.statusCode}");
-        }
-      } catch (e) {
-        print("Error updating baby info: $e");
-      }
-    } else {
-      print("Backend URL or auth token is not set.");
-    }
   }
 
   @override
@@ -256,32 +198,32 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
   // Edit Mode
   Widget _buildEditMode() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
         _buildTextField("Baby's Name", _babyNameController),
-        _buildTextField("Date of Birth", _babyDOBController),
-        _buildTextField("Weight", _babyWeightController),
-        _buildTextField("Gender", _babyGenderController),
-        _buildTextField("Mother's Name", _motherNameController, enabled: false),
-        _buildTextField("Father's Name", _fatherNameController, enabled: false),
-        SizedBox(height: 20),
-        Center(
-          child: ElevatedButton(
-            onPressed: _saveBabyInfo,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFF6C3A82), // Purple Button
-              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Text(
-              "Save",
-              style: TextStyle(fontSize: 16, color: Colors.white),
-            ),
-          ),
-        ),
-      ],
+    _buildTextField("Date of Birth", _babyDOBController),
+    _buildTextField("Weight", _babyWeightController),
+    _buildTextField("Gender", _babyGenderController),
+    _buildTextField("Mother's Name", _motherNameController, enabled: false),
+    _buildTextField("Father's Name", _fatherNameController, enabled: false),
+    SizedBox(height: 20),
+    Center(
+    child: ElevatedButton(
+    onPressed: _saveBabyInfo,
+    style: ElevatedButton.styleFrom(
+    backgroundColor: Color(0xFF6C3A82), // Purple Button
+    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+    shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+    ),
+    ),
+    child: Text(
+    "Save",
+    style: TextStyle(fontSize: 16, color: Colors.white),
+    ),
+    ),
+    ),
+    ],
     );
   }
 

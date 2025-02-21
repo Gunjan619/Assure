@@ -11,31 +11,27 @@ import 'dart:convert';
 class SignInPage extends StatelessWidget {
   const SignInPage({Key? key}) : super(key: key);
 
-  Future<User?> _signInWithGoogle() async {
+  Future<User?> _signInWithGoogle(BuildContext context) async {
     try {
       await dotenv.load(fileName: ".env");
     } catch (e) {
-      print(e);
+      print("Error loading .env file: $e");
     }
+
     try {
-      // Create a GoogleSignIn object
       final GoogleSignIn _googleSignIn = GoogleSignIn();
+      await _googleSignIn.signOut(); // Clear the default account to force account selection
 
-      // Clear the default account to force account selection
-      await _googleSignIn.signOut();
-
-      // Trigger the Google Authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
 
       if (googleUser != null) {
-        // Obtain the Google authentication details
         final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-        // Create a new credential
         final credential = GoogleAuthProvider.credential(
           accessToken: googleAuth.accessToken,
           idToken: googleAuth.idToken,
         );
+
         final url = dotenv.env['BACKEND_URL'];
         final response = await http.post(
           Uri.parse('$url/api/google-login/'),
@@ -50,28 +46,23 @@ class SignInPage extends StatelessWidget {
 
           final storage = FlutterSecureStorage();
           await storage.write(key: 'authToken', value: authToken);
-          // // Proceed with navigation or other actions
-          // Navigator.pushReplacement(
-          //           context,
-          //           MaterialPageRoute(builder: (context) => WelcomeScreen()),
-          //         );
-        } else {
-          // Handle backend request error
-          print('Error sending user data to backend: ${response.statusCode}');
-          // // Display an error message to the user
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text("Backend error")),
-          // );
-        }
 
-        // Sign in to Firebase with the Google credential
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-        return userCredential.user;
+          UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+          return userCredential.user;
+        } else {
+          print('Error sending user data to backend: ${response.statusCode}');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Backend error")),
+          );
+        }
       }
     } catch (e) {
       print("Error signing in with Google: $e");
-      return null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Google sign-in failed")),
+      );
     }
+    return null;
   }
 
   @override
@@ -88,11 +79,11 @@ class SignInPage extends StatelessWidget {
             Column(
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width,  // Full width of the screen
-                  height: 150,  // Adjust the height as per your preference
+                  width: MediaQuery.of(context).size.width,
+                  height: 150,
                   child: Image.asset(
-                    'Images/logo2.png', // Replace with your image path
-                    fit: BoxFit.contain,  // Contain ensures the image fits within the given width and height while maintaining its aspect ratio
+                    'Images/logo2.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
                 SizedBox(height: 10),
@@ -102,8 +93,8 @@ class SignInPage extends StatelessWidget {
 
             // Illustration section
             Image.asset(
-              'Images/openImage.png', // Replace with your illustration image
-              width: 250, // Adjust based on the image size
+              'Images/openImage.png',
+              width: 250,
               height: 250,
               fit: BoxFit.contain,
             ),
@@ -113,16 +104,11 @@ class SignInPage extends StatelessWidget {
             // Google Sign-in button
             GestureDetector(
               onTap: () async {
-                User? user = await _signInWithGoogle();
+                User? user = await _signInWithGoogle(context);
                 if (user != null) {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => WelcomeScreen()),
-                  );
-                } else {
-                  // Handle sign-in failure
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Google sign-in failed")),
                   );
                 }
               },
@@ -134,7 +120,7 @@ class SignInPage extends StatelessWidget {
                     const SizedBox(width: 15),
                     Image.asset(
                       'Images/continue_with_google.png',
-                      height: 40, // Adjust the height as needed
+                      height: 40,
                     ),
                   ],
                 ),
@@ -159,7 +145,6 @@ class SignInPage extends StatelessWidget {
                   decoration: TextDecoration.underline,
                 ),
               ),
-
             ),
           ],
         ),

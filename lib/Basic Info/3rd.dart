@@ -82,7 +82,6 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer $authToken',
           },
-          
           body: jsonEncode({
             'food_allergies': _allergiesController.text,
             'solid_food': _solidFoodController.text,
@@ -105,148 +104,140 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // IMPORTANT: Ye keyboard se overlap hone ka issue fix karega
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: SafeArea(
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: GradientPainter(),
-                ),
-              ),
-              SingleChildScrollView( // Wrap everything inside this
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 60),
-                      Center(
-                        child: Image.asset(
-                          'Images/logo2.png',
-                          height: 60,
-                        ),
-                      ),
-                      SizedBox(height: 40),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 1,
-                            child: Image.asset(
-                              'Images/Food.png',
-                              height: 100,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 20.0),
-                              child: Text(
-                                "Let's learn about your baby's diet!",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  color: Colors.black87,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.right,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 40),
-                      Text(
-                        "Does your baby have any food allergies or dietary restrictions?",
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                      SizedBox(height: 8),
-                      TextField(
-                        controller: _allergiesController,
-                        decoration: InputDecoration(
-                          hintText: "Eg. Dairy, peanut, sugar",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        "Has your baby started eating solid foods?",
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                      SizedBox(height: 8),
-                      TextField(
-                        controller: _solidFoodController,
-                        decoration: InputDecoration(
-                          hintText: "Choice: Yes/No/Planning to start soon",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Text(
-                        "Does your family follow any specific dietary preference?",
-                        style: TextStyle(fontSize: 16, color: Colors.black87),
-                      ),
-                      SizedBox(height: 8),
-                      TextField(
-                        controller: _dietPreferenceController,
-                        decoration: InputDecoration(
-                          hintText: "Choice: Vegetarian/Non-Vegetarian/Vegan",
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 40),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextButton(
-                            onPressed: () {},
-                            child: Text("Prev"),
-                            style: TextButton.styleFrom(
-                              textStyle: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: _isLoading
-                                ? null
-                                : () async{
-                              _storeDietInfo(context);
-                              await sendBabyDietDataToBackend();
-                            },
-                            child: _isLoading
-                                ? CircularProgressIndicator(color: Colors.white)
-                                : Text("Continue"),
-                            style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              textStyle: TextStyle(fontSize: 18),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-                    ],
+      resizeToAvoidBottomInset: true, // Prevents overlap with the keyboard
+      body: Stack(
+        children: [
+          // Fixed Gradient Background
+          Positioned.fill(
+            child: CustomPaint(
+              painter: GradientPainter(),
+            ),
+          ),
+          // Scrollable Content
+          SingleChildScrollView(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 60),
+                Center(
+                  child: Image.asset(
+                    'Images/logo2.png',
+                    height: 60,
                   ),
                 ),
-              ),
-            ],
+                SizedBox(height: 40),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Image.asset(
+                        'Images/Food.png',
+                        height: 100,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: Text(
+                          "Let's learn about your baby's diet!",
+                          style: TextStyle(
+                            fontSize: 22,
+                            color: Colors.black87,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 40),
+                Text(
+                  "Does your baby have any food allergies or dietary restrictions?",
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _allergiesController,
+                  decoration: InputDecoration(
+                    hintText: "Eg. Dairy, peanut, sugar",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Has your baby started eating solid foods?",
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _solidFoodController,
+                  decoration: InputDecoration(
+                    hintText: "Choice: Yes/No/Planning to start soon",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Does your family follow any specific dietary preference?",
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _dietPreferenceController,
+                  decoration: InputDecoration(
+                    hintText: "Choice: Vegetarian/Non-Vegetarian/Vegan",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {},
+                      child: Text("Prev"),
+                      style: TextButton.styleFrom(
+                        textStyle: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: _isLoading
+                          ? null
+                          : () async {
+                        _storeDietInfo(context);
+                        await sendBabyDietDataToBackend();
+                      },
+                      child: _isLoading
+                          ? CircularProgressIndicator(color: Colors.white)
+                          : Text("Continue"),
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        textStyle: TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
-
 }
 
 class GradientPainter extends CustomPainter {
@@ -254,9 +245,9 @@ class GradientPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Gradient gradient = LinearGradient(
       colors: [
-        Color(0xFFFFF4DE),  // Light Cream
-        Color(0xFFEEC6A6),  // Soft Peach
-        Color(0xFFD89A74),  // Warm Sand (for depth)
+        Color(0xFFFFF4DE), // Light Cream
+        Color(0xFFEEC6A6), // Soft Peach
+        Color(0xFFD89A74), // Warm Sand (for depth)
         Color(0xFF8B3A3A),
         Color(0xFFF67E7D), Color(0xFFF8A16D)
       ],

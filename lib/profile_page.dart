@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // For clearing login state
+import 'bottom_navigator.dart'; // Assuming this is your custom bottom navigation bar
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -10,6 +13,12 @@ class _ProfilePageState extends State<ProfilePage> {
   TextEditingController mobileController = TextEditingController();
   TextEditingController genderController = TextEditingController();
   int _selectedIndex = 4;
+  bool _isEditing = false;
+
+  // Dummy profile data
+  String name = "John Doe";
+  String mobile = "123-456-7890";
+  String gender = "Male";
 
   void _onItemTapped(int index) {
     setState(() {
@@ -17,66 +26,122 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  void _toggleEditing() {
+    setState(() {
+      _isEditing = !_isEditing;
+      if (_isEditing) {
+        // Populate the text fields with current data when editing
+        nameController.text = name;
+        mobileController.text = mobile;
+        genderController.text = gender;
+      } else {
+        // Save the data when done editing
+        name = nameController.text;
+        mobile = mobileController.text;
+        gender = genderController.text;
+      }
+    });
+  }
+
+  // Logout function
+  Future<void> _logout() async {
+    // Clear secure storage (e.g., auth token)
+    final storage = FlutterSecureStorage();
+    await storage.delete(key: 'authToken');
+
+    // Clear SharedPreferences (e.g., login state)
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+
+    // Navigate to the SignInPage or any other login screen
+    Navigator.pushReplacementNamed(context, '/signin'); // Replace with your login route
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color(0xFFFFF4DE), // Soft Cream Background
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: const Text("Manage Your Profile", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
         centerTitle: true,
-        title: Column(
-          children: [
-            Image.asset(
-              'assets/logo.png', // Add your logo image
-              height: 40,
-            ),
-            Text(
-              "Manage your profile",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
+        backgroundColor: Color(0xFFF67E7D),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            onPressed: _toggleEditing,
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (_isEditing) ...[
+                buildTextField("Name", nameController),
+                SizedBox(height: 15),
+                buildTextField("Mobile Number", mobileController),
+                SizedBox(height: 15),
+                buildTextField("Gender", genderController),
+              ] else ...[
+                buildProfileInfo("Name", name),
+                SizedBox(height: 15),
+                buildProfileInfo("Mobile Number", mobile),
+                SizedBox(height: 15),
+                buildProfileInfo("Gender", gender),
+              ],
+              SizedBox(height: 30),
+              if (_isEditing)
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _toggleEditing();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF6C3A82), // Purple Button
+                      padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      "Save Profile",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+              SizedBox(height: 20),
+              // Logout Button
+              Center(
+                child: ElevatedButton(
+                  onPressed: _logout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Red color for logout
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    "Logout",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            buildTextField("Name", nameController),
-            SizedBox(height: 15),
-            buildTextField("Mobile Number", mobileController),
-            SizedBox(height: 15),
-            buildTextField("Gender", genderController),
-          ],
-        ),
+      bottomNavigationBar: CustomBottomNavBar(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Color(0xFFFCEEC1),
-        shape: CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            buildNavItem(Icons.home, 0),
-            buildNavItem(Icons.child_care, 1),
-            SizedBox(width: 40), // Space for floating button
-            buildNavItem(Icons.shopping_bag, 3),
-            buildNavItem(Icons.person, 4),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.purple,
-        onPressed: () {},
-        child: Icon(Icons.chat, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
@@ -86,30 +151,76 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF6C3A82), // Purple Text
+          ),
         ),
         SizedBox(height: 5),
-        TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
+        SingleChildScrollView(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 5,
+                  spreadRadius: 1,
+                  offset: Offset(0, 2),
+                )
+              ],
             ),
-            filled: true,
-            fillColor: Colors.white,
+            child: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                hintText: "Enter $label",
+                hintStyle: TextStyle(color: Colors.grey),
+              ),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget buildNavItem(IconData icon, int index) {
-    return IconButton(
-      icon: Icon(
-        icon,
-        color: _selectedIndex == index ? Colors.purple : Colors.black,
-      ),
-      onPressed: () => _onItemTapped(index),
+  Widget buildProfileInfo(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF6C3A82), // Purple Text
+          ),
+        ),
+        SizedBox(height: 5),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+            BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            spreadRadius: 1,
+            offset: Offset(0, 2),
+            )
+            ],
+          ),
+          child: Text(
+            value.isNotEmpty ? value : "Not available",
+            style: TextStyle(fontSize: 16, color: Colors.black),
+          ),
+        ),
+      ],
     );
   }
 }

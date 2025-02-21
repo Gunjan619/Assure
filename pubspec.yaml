@@ -53,6 +53,9 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  shared_preferences: ^2.2.2
+
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -83,6 +86,8 @@ flutter:
     - Images/continue_with_google.png
     - .env
     - Images/First Blob.png
+    - Images/banner.jpg
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
