@@ -35,23 +35,30 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       final User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         print("No user is logged in.");
-        return;
       }
+      else{
 
-      // Log the data being sent to Firestore
-      print("Storing data: name=${nameController.text.trim()}, role=$selectedRole");
+      
 
-      // Add data to Firestore with the user's UID as the document ID
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid) // Use the user's UID as the document ID
-          .set({
-        'name': nameController.text.trim(),
-        'role': selectedRole,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+        // Log the data being sent to Firestore
+        print("Storing data: name=${nameController.text.trim()}, role=$selectedRole");
 
-      print("Data successfully stored in Firestore!");
+        // Add data to Firestore with the user's UID as the document ID
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid) // Use the user's UID as the document ID
+            .set({
+          'name': nameController.text.trim(),
+          'role': selectedRole,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        print("Data successfully stored in Firestore!");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => BabyInfoPage()),
+        );
+      }
     } catch (e) {
       print("Error storing data: $e");
     }
@@ -227,12 +234,18 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               onPressed: (nameController.text.isNotEmpty &&
                                   selectedRole.isNotEmpty)
                                   ? () async {
-                                await storeDataToFirestore();
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => BabyInfoPage()),
-                                );
+                                await sendDataToBackend();
+                                    final User? user = FirebaseAuth.instance.currentUser;
+                                if (user != null) {await storeDataToFirestore();}
+                                else{
+                                  Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  BabyInfoPage()),
+                                        );
+                                }
+                                
                               }
                                   : null,
                               style: ElevatedButton.styleFrom(

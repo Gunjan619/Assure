@@ -36,28 +36,29 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
       final User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         print("No user is logged in.");
-        return;
       }
+      else{
 
-      Map<String, dynamic> dietData = {
-        'allergies': _allergiesController.text.trim(),
-        'solidFood': _solidFoodController.text.trim(),
-        'dietPreference': _dietPreferenceController.text.trim(),
-        'timestamp': FieldValue.serverTimestamp(),
-      };
+        Map<String, dynamic> dietData = {
+          'allergies': _allergiesController.text.trim(),
+          'solidFood': _solidFoodController.text.trim(),
+          'dietPreference': _dietPreferenceController.text.trim(),
+          'timestamp': FieldValue.serverTimestamp(),
+        };
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('dietInfo')
-          .add(dietData);
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('dietInfo')
+            .add(dietData);
 
-      print("Diet information successfully stored in Firestore!");
+        print("Diet information successfully stored in Firestore!");
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Home_main()),
-      );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Home_main()),
+        );
+    }
     } catch (e) {
       print("Error storing diet information: $e");
       ScaffoldMessenger.of(context).showSnackBar(
@@ -88,7 +89,7 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
             'diet': _dietPreferenceController.text,
           }),
         );
-        if (response.statusCode == 200) {
+        if (response.statusCode == 201) {
           print("Baby diet data successfully sent to the backend!");
         } else {
           print("Failed to send baby diet data to the backend: ${response.statusCode}");
@@ -214,8 +215,16 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
                       onPressed: _isLoading
                           ? null
                           : () async {
-                        _storeDietInfo(context);
-                        await sendBabyDietDataToBackend();
+                            await sendBabyDietDataToBackend();
+                            final User? user = FirebaseAuth.instance.currentUser;
+                          if (user != null){_storeDietInfo(context);}
+                          else{
+                             Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Home_main()),
+                              );
+                          }
+                        
                       },
                       child: _isLoading
                           ? CircularProgressIndicator(color: Colors.white)

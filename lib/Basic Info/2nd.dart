@@ -79,7 +79,7 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
             'dob': _selectedDate != null ? DateFormat('yyyy-MM-dd').format(_selectedDate!) : null,
           }),
         );
-        if (response.statusCode == 200) {
+        if (response.statusCode == 201 || response.statusCode == 200) {
           print("Baby data successfully sent to the backend!");
         } else {
           print("Failed to send baby data to the backend: ${response.statusCode}");
@@ -99,26 +99,32 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
       final User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         print("No user is logged in.");
-        return;
+        
       }
+      else{
 
-      // Prepare the data to be stored
-      Map<String, dynamic> babyData = {
-        'babyName': _babyNameController.text.trim(),
-        'babyGender': _selectedGender,
-        'babyWeight': _babyWeightController.text.trim(),
-        'babyDOB': _selectedDate,
-        'timestamp': FieldValue.serverTimestamp(), // Add a timestamp
-      };
+        // Prepare the data to be stored
+        Map<String, dynamic> babyData = {
+          'babyName': _babyNameController.text.trim(),
+          'babyGender': _selectedGender,
+          'babyWeight': _babyWeightController.text.trim(),
+          'babyDOB': _selectedDate,
+          'timestamp': FieldValue.serverTimestamp(), // Add a timestamp
+        };
 
-      // Store the data in Firestore
-      await FirebaseFirestore.instance
-          .collection('users') // Parent collection
-          .doc(user.uid) // User's document
-          .collection('babyInfo') // Subcollection for baby's information
-          .add(babyData); // Add a new document with baby's data
+        // Store the data in Firestore
+        await FirebaseFirestore.instance
+            .collection('users') // Parent collection
+            .doc(user.uid) // User's document
+            .collection('babyInfo') // Subcollection for baby's information
+            .add(babyData); // Add a new document with baby's data
 
-      print("Baby's information successfully stored in Firestore!");
+        print("Baby's information successfully stored in Firestore!");
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => BabyDietScreen()),
+        );
+      }  
     } catch (e) {
       print("Error storing baby's information: $e");
     }
@@ -356,11 +362,14 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
                       print('Baby Date of Birth: ${_selectedDate.toString()}');
                       await sendBabyDataToBackend();
 
-                      await _storeBabyInfo();
+                      final User? user = FirebaseAuth.instance.currentUser;
+                          if (user != null){await _storeBabyInfo();}
+                          else{
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => BabyDietScreen()),
                       );
+                          }
                     } else {
                       // Handle error for invalid input
                       ScaffoldMessenger.of(context).showSnackBar(

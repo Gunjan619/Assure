@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../Home_main.dart';
 
 class CodeVerificationScreen extends StatefulWidget {
   @override
@@ -157,11 +158,22 @@ String? phoneNumber; // Variable to store phone number
 
                       final storage = FlutterSecureStorage();
                       await storage.write(key: 'authToken', value: authToken);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => WelcomeScreen()),
-                      );
+                      if (!responseData['is_new_user']) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Home_main(),
+                          ),
+                        );
+                      } else {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WelcomeScreen(),
+                          ),
+                        );
+                      }
+                      
                     } else {
                       // OTP verification failed
                       print(response.body);

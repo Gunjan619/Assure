@@ -6,6 +6,10 @@ import 'Basic Info/forum.dart';
 import 'Basic Info/weight.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'bottom_navigator.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Home_main extends StatefulWidget {
   @override
@@ -14,6 +18,44 @@ class Home_main extends StatefulWidget {
 
 class _Home_mainState extends State<Home_main> {
   int _selectedIndex = 0;
+  String babyName = "";
+  String babyHeight = "";
+  String babyWeight = "";
+
+  @override
+  void initState() {
+    super.initState();
+    fetchBabyInfo();
+  }
+
+  void fetchBabyInfo() async {
+    final url = dotenv.env['BACKEND_URL'];
+    final storage = FlutterSecureStorage();
+    final authToken = await storage.read(key: 'authToken');
+    if (url != null && authToken != null) {
+      final response = await http.get(
+        Uri.parse('$url/api/babies/'),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print(data['name']);
+        if (mounted) {
+          setState(() {
+            babyName = data['name'] ?? "";
+            babyHeight = data['height']?.toString() ?? "N/A";
+            babyWeight = data['weight']?.toString() ?? "N/A";
+          });
+        }
+      } else {
+        print('Failed to fetch baby info: ${response.statusCode}');
+      }
+    } else {
+      print('Backend URL or authToken is null');
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -35,7 +77,11 @@ class _Home_mainState extends State<Home_main> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 50),
-            BabyMilestoneCard(),
+            BabyMilestoneCard(
+              babyName: babyName,
+              babyHeight: babyHeight,
+              babyWeight: babyWeight,
+            ),
             SizedBox(height: 10),
 
             // Activity Cards Grid
@@ -318,6 +364,16 @@ class FeatureIcon extends StatelessWidget {
 }
 
 class BabyMilestoneCard extends StatelessWidget {
+  final String babyName;
+  final String babyHeight;
+  final String babyWeight;
+
+  BabyMilestoneCard({
+    required this.babyName,
+    required this.babyHeight,
+    required this.babyWeight,
+  });
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -370,7 +426,7 @@ class BabyMilestoneCard extends StatelessWidget {
     children: [
     // Baby Name
     Text(
-    "Baby Name",
+    babyName,
     style: TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,
@@ -400,20 +456,20 @@ class BabyMilestoneCard extends StatelessWidget {
     // Icons and Stats
     Row(
     children: [
-    Icon(Icons.access_time, size: 16, color: Color(0xFF6C3A82)), // Purple icon
+    Icon(Icons.straighten, size: 16, color: Color(0xFF6C3A82)), // Purple icon
     SizedBox(width: 4),
     Text(
-    "45m",
+    babyHeight,
     style: TextStyle(
     fontSize: 14,
     color: Color(0xFF6C3A82).withOpacity(0.8), // Purple text
     ),
     ),
     SizedBox(width: 16),
-    Icon(Icons.cake, size: 16, color: Color(0xFF6C3A82)), // Purple icon
+    Icon(Icons.fitness_center, size: 16, color: Color(0xFF6C3A82)), // Purple icon
     SizedBox(width: 4),
     Text(
-    "3.5kg",
+    babyWeight,
     style: TextStyle(
     fontSize: 14,
     color: Color(0xFF6C3A82).withOpacity(0.8), // Purple text

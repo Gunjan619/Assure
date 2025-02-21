@@ -5,6 +5,7 @@ import 'Basic Info/chatbot.dart';
 import 'babyinfog.dart';
 import 'home_main.dart'; // Import the Home_main class
 import 'profile_page.dart'; // Import the ProfilePage class
+import 'webview_page.dart'; // Import the WebViewPage class
 
 class CustomBottomNavBar extends StatelessWidget {
   final int selectedIndex;
@@ -38,7 +39,16 @@ class CustomBottomNavBar extends StatelessWidget {
             context,
             MaterialPageRoute(builder: (context) => Home_main()),
           );
-        } else if (index == 4) {
+          
+        }
+        else if (index==3){
+          // Redirect to WebViewPage
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => WebViewPage()),
+          );
+        } 
+        else if (index == 4) {
           // Redirect to ProfilePage
           Navigator.push(
             context,
