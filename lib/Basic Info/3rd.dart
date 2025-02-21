@@ -85,8 +85,8 @@ class _BabyDietScreenState extends State<BabyDietScreen> {
           
           body: jsonEncode({
             'food_allergies': _allergiesController.text,
-            'solid_food': _solidFoodsController.text,
-            'diet': _dietaryPreferenceController.text,
+            'solid_food': _solidFoodController.text,
+            'diet': _dietPreferenceController.text,
           }),
         );
         if (response.statusCode == 200) {

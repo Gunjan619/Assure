@@ -124,14 +124,9 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
       print("Error saving baby info: $e");
     }
   }
-  final TextEditingController _babyNameController = TextEditingController();
+ 
   final TextEditingController _babyDobController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchBabyInfo();
-  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -146,7 +141,7 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
   }
 
 
-  Future<void> _fetchBabyInfo() async {
+  Future<void> _fetchBabyInfoFromBackend() async {
     final url = dotenv.env['BACKEND_URL'];
     final storage = FlutterSecureStorage();
     final authToken = await storage.read(key: 'authToken');
@@ -176,7 +171,7 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
     }
   }
 
-  Future<void> _updateBabyInfo() async {
+  Future<void> _updateBabyInfoFromBackend() async {
     final url = dotenv.env['BACKEND_URL'];
     final storage = FlutterSecureStorage();
     final authToken = await storage.read(key: 'authToken');
@@ -191,6 +186,7 @@ class _BabyInfoPageState extends State<BabyInfoPage> {
           body: jsonEncode({
             'name': _babyNameController.text,
             'dob': _babyDobController.text,
+            
           }),
         );
         if (response.statusCode == 200) {
